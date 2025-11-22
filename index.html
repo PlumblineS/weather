@@ -105,6 +105,11 @@
             font-weight: 300;
         }
         
+        .weather-icon {
+            font-size: 80px;
+            margin: 20px 0;
+        }
+        
         /* Weekly Forecast */
         .week-grid {
             display: grid;
@@ -151,10 +156,9 @@
         .radar-frame {
             width: 90%;
             max-width: 1200px;
-            height: 80%;
-            border: none;
+            height: auto;
+            object-fit: contain;
             border-radius: 15px;
-            background: rgba(0,0,0,0.3);
         }
         
         /* View indicator */
@@ -195,6 +199,7 @@
     <div class="view active" id="view-current">
         <div class="forecast-display">
             <div class="day-label">Current Conditions</div>
+            <div class="weather-icon" id="current-icon"></div>
             <div class="main-temp" id="current-temp">--°F</div>
             <div class="condition" id="current-condition">Loading...</div>
             <div class="details" id="current-details"></div>
@@ -205,6 +210,7 @@
     <div class="view" id="view-today">
         <div class="forecast-display">
             <div class="day-label">Today's Forecast</div>
+            <div class="weather-icon" id="today-icon"></div>
             <div class="main-temp" id="today-temp">--°F</div>
             <div class="condition" id="today-condition">Loading...</div>
             <div class="details" id="today-details"></div>
@@ -215,6 +221,7 @@
     <div class="view" id="view-tomorrow">
         <div class="forecast-display">
             <div class="day-label">Tomorrow's Forecast</div>
+            <div class="weather-icon" id="tomorrow-icon"></div>
             <div class="main-temp" id="tomorrow-temp">--°F</div>
             <div class="condition" id="tomorrow-condition">Loading...</div>
             <div class="details" id="tomorrow-details"></div>
@@ -228,17 +235,16 @@
         </div>
     </div>
 
-   <!-- View 5: Radar -->
-<div class="view" id="view-radar">
-    <div class="radar-container">
-        <img 
-            class="radar-frame" 
-            id="radar-img"
-            src="https://radar.weather.gov/ridge/standard/KFTG_loop.gif"
-            style="width: 90%; max-width: 1200px; height: auto; object-fit: contain;"
-            alt="Weather Radar">
+    <!-- View 5: Radar -->
+    <div class="view" id="view-radar">
+        <div class="radar-container">
+            <img 
+                class="radar-frame" 
+                id="radar-img"
+                src="https://radar.weather.gov/ridge/standard/KFTG_loop.gif"
+                alt="Weather Radar">
+        </div>
     </div>
-</div>
 
     <!-- View Indicator Dots -->
     <div class="view-indicator">
@@ -255,10 +261,11 @@
         let currentViewIndex = 0;
         let weatherData = null;
 
-        // Update time
+        // Update time - MOUNTAIN TIME
         function updateTime() {
             const now = new Date();
             document.getElementById('current-time').textContent = now.toLocaleString('en-US', {
+                timeZone: 'America/Denver',
                 weekday: 'short',
                 month: 'short',
                 day: 'numeric',
@@ -266,6 +273,37 @@
                 minute: '2-digit',
                 hour12: true
             });
+        }
+
+        // Get weather icon based on condition
+        function getWeatherIcon(shortForecast) {
+            const forecast = shortForecast.toLowerCase();
+            
+            if (forecast.includes('sunny') || forecast.includes('clear')) {
+                return '☀️';
+            } else if (forecast.includes('partly cloudy') || forecast.includes('partly sunny')) {
+                return '⛅';
+            } else if (forecast.includes('cloudy') || forecast.includes('overcast')) {
+                return '☁️';
+            } else if (forecast.includes('rain') && forecast.includes('thunder')) {
+                return '⛈️';
+            } else if (forecast.includes('rain') || forecast.includes('shower')) {
+                return '🌧️';
+            } else if (forecast.includes('snow') && forecast.includes('rain')) {
+                return '🌨️';
+            } else if (forecast.includes('snow')) {
+                return '❄️';
+            } else if (forecast.includes('thunder') || forecast.includes('storm')) {
+                return '⛈️';
+            } else if (forecast.includes('fog')) {
+                return '🌫️';
+            } else if (forecast.includes('wind')) {
+                return '💨';
+            } else if (forecast.includes('haze') || forecast.includes('smoke')) {
+                return '🌫️';
+            } else {
+                return '🌤️'; // default
+            }
         }
 
         // Cycle through views
@@ -280,109 +318,95 @@
             document.querySelectorAll('.dot')[currentViewIndex].classList.add('active');
         }
 
-        // Get weather icon based on condition
-function getWeatherIcon(shortForecast) {
-    const forecast = shortForecast.toLowerCase();
-    
-    if (forecast.includes('sunny') || forecast.includes('clear')) {
-        return '☀️';
-    } else if (forecast.includes('partly cloudy') || forecast.includes('partly sunny')) {
-        return '⛅';
-    } else if (forecast.includes('cloudy') || forecast.includes('overcast')) {
-        return '☁️';
-    } else if (forecast.includes('rain') && forecast.includes('thunder')) {
-        return '⛈️';
-    } else if (forecast.includes('rain') || forecast.includes('shower')) {
-        return '🌧️';
-    } else if (forecast.includes('snow') && forecast.includes('rain')) {
-        return '🌨️';
-    } else if (forecast.includes('snow')) {
-        return '❄️';
-    } else if (forecast.includes('thunder') || forecast.includes('storm')) {
-        return '⛈️';
-    } else if (forecast.includes('fog')) {
-        return '🌫️';
-    } else if (forecast.includes('wind')) {
-        return '💨';
-    } else if (forecast.includes('haze') || forecast.includes('smoke')) {
-        return '🌫️';
-    } else {
-        return '🌤️'; // default
-    }
-}
-
-// Fetch and update weather - USING DIRECT FORECAST URL
-async function updateWeather() {
-    try {
-        // Use direct forecast URL for Centennial area (Denver/Boulder forecast office)
-        const forecastResponse = await fetch('https://api.weather.gov/gridpoints/BOU/64,63/forecast');
-        const forecastData = await forecastResponse.json();
-        
-        weatherData = forecastData.properties.periods;
-        
-        // Update current/today
-        if (weatherData[0]) {
-            const current = weatherData[0];
-            const icon = getWeatherIcon(current.shortForecast);
-            
-            document.getElementById('current-temp').innerHTML = icon + ' ' + current.temperature + '°' + current.temperatureUnit;
-            document.getElementById('current-condition').textContent = current.shortForecast;
-            document.getElementById('current-details').textContent = current.detailedForecast;
-            
-            document.getElementById('today-temp').innerHTML = icon + ' ' + current.temperature + '°' + current.temperatureUnit;
-            document.getElementById('today-condition').textContent = current.shortForecast;
-            document.getElementById('today-details').textContent = current.detailedForecast;
+        // Fetch and update weather
+        async function updateWeather() {
+            try {
+                // Use direct forecast URL for Centennial area
+                const forecastResponse = await fetch('https://api.weather.gov/gridpoints/BOU/64,63/forecast');
+                const forecastData = await forecastResponse.json();
+                
+                weatherData = forecastData.properties.periods;
+                
+                // Update current/today
+                if (weatherData[0]) {
+                    const current = weatherData[0];
+                    const icon = getWeatherIcon(current.shortForecast);
+                    
+                    document.getElementById('current-icon').textContent = icon;
+                    document.getElementById('current-temp').textContent = current.temperature + '°' + current.temperatureUnit;
+                    document.getElementById('current-condition').textContent = current.shortForecast;
+                    document.getElementById('current-details').textContent = current.detailedForecast;
+                    
+                    document.getElementById('today-icon').textContent = icon;
+                    document.getElementById('today-temp').textContent = current.temperature + '°' + current.temperatureUnit;
+                    document.getElementById('today-condition').textContent = current.shortForecast;
+                    document.getElementById('today-details').textContent = current.detailedForecast;
+                }
+                
+                // Update tomorrow
+                if (weatherData[2]) {
+                    const tomorrow = weatherData[2]; // Skip tonight, get tomorrow day
+                    const icon = getWeatherIcon(tomorrow.shortForecast);
+                    
+                    document.getElementById('tomorrow-icon').textContent = icon;
+                    document.getElementById('tomorrow-temp').textContent = tomorrow.temperature + '°' + tomorrow.temperatureUnit;
+                    document.getElementById('tomorrow-condition').textContent = tomorrow.shortForecast;
+                    document.getElementById('tomorrow-details').textContent = tomorrow.detailedForecast;
+                }
+                
+                // Update weekly
+                updateWeeklyForecast();
+                
+            } catch (error) {
+                console.error('Error fetching weather:', error);
+                // Use fallback data
+                document.getElementById('current-icon').textContent = '☀️';
+                document.getElementById('current-temp').textContent = '72°F';
+                document.getElementById('current-condition').textContent = 'Partly Cloudy';
+                document.getElementById('current-details').textContent = 'Weather data temporarily unavailable';
+            }
         }
-        
-        // Update tomorrow
-        if (weatherData[2]) {
-            const tomorrow = weatherData[2]; // Skip tonight, get tomorrow day
-            const icon = getWeatherIcon(tomorrow.shortForecast);
-            
-            document.getElementById('tomorrow-temp').innerHTML = icon + ' ' + tomorrow.temperature + '°' + tomorrow.temperatureUnit;
-            document.getElementById('tomorrow-condition').textContent = tomorrow.shortForecast;
-            document.getElementById('tomorrow-details').textContent = tomorrow.detailedForecast;
-        }
-        
-        // Update weekly
-        updateWeeklyForecast();
-        
-    } catch (error) {
-        console.error('Error fetching weather:', error);
-        // Use fallback data
-        document.getElementById('current-temp').innerHTML = '☀️ 72°F';
-        document.getElementById('current-condition').textContent = 'Partly Cloudy';
-        document.getElementById('current-details').textContent = 'Weather data temporarily unavailable';
-    }
-}
 
-// Update weekly forecast grid with icons
-function updateWeeklyForecast() {
-    const grid = document.getElementById('week-grid');
-    grid.innerHTML = '';
-    
-    if (!weatherData) return;
-    
-    // Show next 7 day periods (every other one to get days, not nights)
-    for (let i = 0; i < Math.min(14, weatherData.length); i += 2) {
-        const period = weatherData[i];
-        const icon = getWeatherIcon(period.shortForecast);
-        const card = document.createElement('div');
-        card.className = 'day-card';
-        card.innerHTML = `
-            <div class="day-name">${period.name}</div>
-            <div style="font-size: 48px; margin: 10px 0;">${icon}</div>
-            <div class="day-temp">${period.temperature}°${period.temperatureUnit}</div>
-            <div class="day-condition">${period.shortForecast}</div>
-        `;
-        grid.appendChild(card);
-    }
-}
+        // Update weekly forecast grid
+        function updateWeeklyForecast() {
+            const grid = document.getElementById('week-grid');
+            grid.innerHTML = '';
+            
+            if (!weatherData) return;
+            
+            // Show next 7 day periods (every other one to get days, not nights)
+            for (let i = 0; i < Math.min(14, weatherData.length); i += 2) {
+                const period = weatherData[i];
+                const icon = getWeatherIcon(period.shortForecast);
+                const card = document.createElement('div');
+                card.className = 'day-card';
+                card.innerHTML = `
+                    <div class="day-name">${period.name}</div>
+                    <div style="font-size: 48px; margin: 10px 0;">${icon}</div>
+                    <div class="day-temp">${period.temperature}°${period.temperatureUnit}</div>
+                    <div class="day-condition">${period.shortForecast}</div>
+                `;
+                grid.appendChild(card);
+            }
+        }
+
+        // Auto-refresh radar
+        function updateRadar() {
+            const radarImg = document.getElementById('radar-img');
+            if (radarImg) {
+                radarImg.src = 'https://radar.weather.gov/ridge/standard/KFTG_loop.gif?' + new Date().getTime();
+            }
+        }
+
+        // Initialize
+        updateTime();
+        updateWeather();
         
         // Set up intervals
         setInterval(updateTime, 1000);          // Update time every second
         setInterval(nextView, 10000);           // Change view every 10 seconds
         setInterval(updateWeather, 600000);     // Update weather every 10 minutes
+        setInterval(updateRadar, 300000);       // Refresh radar every 5 minutes
 
         // Allow manual view switching with keyboard
         document.addEventListener('keydown', (e) => {
