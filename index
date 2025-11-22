@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Display</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: rgba(0,0,0,0.3);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .company-logo {
+            height: 40px;
+            width: auto;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+        
+        .location {
+            font-size: 28px;
+            font-weight: bold;
+        }
+        
+        .current-time {
+            font-size: 20px;
+        }
+        
+        .view {
+            position: absolute;
+            width: 100%;
+            height: 100vh;
+            padding-top: 80px;
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+        
+        .view.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* Current/Today/Tomorrow Views */
+        .forecast-display {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: calc(100vh - 80px);
+            padding: 40px;
+        }
+        
+        .main-temp {
+            font-size: 120px;
+            font-weight: bold;
+            line-height: 1;
+        }
+        
+        .condition {
+            font-size: 36px;
+            margin: 20px 0;
+        }
+        
+        .details {
+            font-size: 24px;
+            opacity: 0.9;
+            text-align: center;
+            max-width: 800px;
+            line-height: 1.5;
+        }
+        
+        .day-label {
+            font-size: 48px;
+            margin-bottom: 30px;
+            font-weight: 300;
+        }
+        
+        /* Weekly Forecast */
+        .week-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 40px;
+            height: calc(100vh - 80px);
+            align-content: center;
+        }
+        
+        .day-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+        
+        .day-name {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        
+        .day-temp {
+            font-size: 36px;
+            margin: 10px 0;
+        }
+        
+        .day-condition {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+        
+        /* Radar */
+        .radar-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: calc(100vh - 80px);
+            padding: 20px;
+        }
+        
+        .radar-frame {
+            width: 90%;
+            max-width: 1200px;
+            height: 80%;
+            border: none;
+            border-radius: 15px;
+            background: rgba(0,0,0,0.3);
+        }
+        
+        /* View indicator */
+        .view-indicator {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+        
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            transition: background 0.3s;
+        }
+        
+        .dot.active {
+            background: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-left">
+            <img src="https://wg.scene7.com/is/image/wrenchgroup/updated-2023-logo-pl23wi001wg?fmt=png-alpha" alt="Plumbline Services" class="company-logo">
+            <div class="location">Centennial, CO</div>
+        </div>
+        <div class="current-time" id="current-time"></div>
+    </div>
+
+    <!-- View 1: Current Conditions -->
+    <div class="view active" id="view-current">
+        <div class="forecast-display">
+            <div class="day-label">Current Conditions</div>
+            <div class="main-temp" id="current-temp">--°F</div>
+            <div class="condition" id="current-condition">Loading...</div>
+            <div class="details" id="current-details"></div>
+        </div>
+    </div>
+
+    <!-- View 2: Today's Forecast -->
+    <div class="view" id="view-today">
+        <div class="forecast-display">
+            <div class="day-label">Today's Forecast</div>
+            <div class="main-temp" id="today-temp">--°F</div>
+            <div class="condition" id="today-condition">Loading...</div>
+            <div class="details" id="today-details"></div>
+        </div>
+    </div>
+
+    <!-- View 3: Tomorrow's Forecast -->
+    <div class="view" id="view-tomorrow">
+        <div class="forecast-display">
+            <div class="day-label">Tomorrow's Forecast</div>
+            <div class="main-temp" id="tomorrow-temp">--°F</div>
+            <div class="condition" id="tomorrow-condition">Loading...</div>
+            <div class="details" id="tomorrow-details"></div>
+        </div>
+    </div>
+
+    <!-- View 4: Weekly Forecast -->
+    <div class="view" id="view-week">
+        <div class="week-grid" id="week-grid">
+            <!-- Weekly forecast cards will be inserted here -->
+        </div>
+    </div>
+
+    <!-- View 5: Radar -->
+    <div class="view" id="view-radar">
+        <div class="radar-container">
+            <iframe 
+                class="radar-frame"
+                src="https://embed.windy.com/embed2.html?lat=39.581&lon=-104.877&zoom=8&level=surface&overlay=radar&menu=&message=&marker=&calendar=&pressure=&type=map&location=coordinates&detail=&detailLat=39.581&detailLon=-104.877&metricWind=mph&metricTemp=%C2%B0F&radarRange=-1"
+                frameborder="0">
+            </iframe>
+        </div>
+    </div>
+
+    <!-- View Indicator Dots -->
+    <div class="view-indicator">
+        <div class="dot active"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+    </div>
+
+    <script>
+        // Configuration
+        const views = ['view-current', 'view-today', 'view-tomorrow', 'view-week', 'view-radar'];
+        let currentViewIndex = 0;
+        let weatherData = null;
+
+        // Update time
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('current-time').textContent = now.toLocaleString('en-US', {
+                weekday: 'short',
+                month: 'short',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+            });
+        }
+
+        // Cycle through views
+        function nextView() {
+            // Hide current view
+            document.getElementById(views[currentViewIndex]).classList.remove('active');
+            document.querySelectorAll('.dot')[currentViewIndex].classList.remove('active');
+            
+            // Show next view
+            currentViewIndex = (currentViewIndex + 1) % views.length;
+            document.getElementById(views[currentViewIndex]).classList.add('active');
+            document.querySelectorAll('.dot')[currentViewIndex].classList.add('active');
+        }
+
+        // Fetch and update weather - USING DIRECT FORECAST URL
+        async function updateWeather() {
+            try {
+                // Use direct forecast URL for Centennial area (Denver/Boulder forecast office)
+                const forecastResponse = await fetch('https://api.weather.gov/gridpoints/BOU/64,63/forecast');
+                const forecastData = await forecastResponse.json();
+                
+                weatherData = forecastData.properties.periods;
+                
+                // Update current/today
+                if (weatherData[0]) {
+                    const current = weatherData[0];
+                    document.getElementById('current-temp').textContent = current.temperature + '°' + current.temperatureUnit;
+                    document.getElementById('current-condition').textContent = current.shortForecast;
+                    document.getElementById('current-details').textContent = current.detailedForecast;
+                    
+                    document.getElementById('today-temp').textContent = current.temperature + '°' + current.temperatureUnit;
+                    document.getElementById('today-condition').textContent = current.shortForecast;
+                    document.getElementById('today-details').textContent = current.detailedForecast;
+                }
+                
+                // Update tomorrow
+                if (weatherData[2]) {
+                    const tomorrow = weatherData[2]; // Skip tonight, get tomorrow day
+                    document.getElementById('tomorrow-temp').textContent = tomorrow.temperature + '°' + tomorrow.temperatureUnit;
+                    document.getElementById('tomorrow-condition').textContent = tomorrow.shortForecast;
+                    document.getElementById('tomorrow-details').textContent = tomorrow.detailedForecast;
+                }
+                
+                // Update weekly
+                updateWeeklyForecast();
+                
+            } catch (error) {
+                console.error('Error fetching weather:', error);
+                // Use fallback data
+                document.getElementById('current-temp').textContent = '72°F';
+                document.getElementById('current-condition').textContent = 'Partly Cloudy';
+                document.getElementById('current-details').textContent = 'Weather data temporarily unavailable';
+            }
+        }
+
+        // Update weekly forecast grid
+        function updateWeeklyForecast() {
+            const grid = document.getElementById('week-grid');
+            grid.innerHTML = '';
+            
+            if (!weatherData) return;
+            
+            // Show next 7 day periods (every other one to get days, not nights)
+            for (let i = 0; i < Math.min(14, weatherData.length); i += 2) {
+                const period = weatherData[i];
+                const card = document.createElement('div');
+                card.className = 'day-card';
+                card.innerHTML = `
+                    <div class="day-name">${period.name}</div>
+                    <div class="day-temp">${period.temperature}°${period.temperatureUnit}</div>
+                    <div class="day-condition">${period.shortForecast}</div>
+                `;
+                grid.appendChild(card);
+            }
+        }
+
+        // Initialize
+        updateTime();
+        updateWeather();
+        
+        // Set up intervals
+        setInterval(updateTime, 1000);          // Update time every second
+        setInterval(nextView, 10000);           // Change view every 10 seconds
+        setInterval(updateWeather, 600000);     // Update weather every 10 minutes
+
+        // Allow manual view switching with keyboard
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') nextView();
+        });
+    </script>
+</body>
+</html>
