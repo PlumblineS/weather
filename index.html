@@ -280,71 +280,104 @@
             document.querySelectorAll('.dot')[currentViewIndex].classList.add('active');
         }
 
-        // Fetch and update weather - USING DIRECT FORECAST URL
-        async function updateWeather() {
-            try {
-                // Use direct forecast URL for Centennial area (Denver/Boulder forecast office)
-                const forecastResponse = await fetch('https://api.weather.gov/gridpoints/BOU/64,63/forecast');
-                const forecastData = await forecastResponse.json();
-                
-                weatherData = forecastData.properties.periods;
-                
-                // Update current/today
-                if (weatherData[0]) {
-                    const current = weatherData[0];
-                    document.getElementById('current-temp').textContent = current.temperature + '°' + current.temperatureUnit;
-                    document.getElementById('current-condition').textContent = current.shortForecast;
-                    document.getElementById('current-details').textContent = current.detailedForecast;
-                    
-                    document.getElementById('today-temp').textContent = current.temperature + '°' + current.temperatureUnit;
-                    document.getElementById('today-condition').textContent = current.shortForecast;
-                    document.getElementById('today-details').textContent = current.detailedForecast;
-                }
-                
-                // Update tomorrow
-                if (weatherData[2]) {
-                    const tomorrow = weatherData[2]; // Skip tonight, get tomorrow day
-                    document.getElementById('tomorrow-temp').textContent = tomorrow.temperature + '°' + tomorrow.temperatureUnit;
-                    document.getElementById('tomorrow-condition').textContent = tomorrow.shortForecast;
-                    document.getElementById('tomorrow-details').textContent = tomorrow.detailedForecast;
-                }
-                
-                // Update weekly
-                updateWeeklyForecast();
-                
-            } catch (error) {
-                console.error('Error fetching weather:', error);
-                // Use fallback data
-                document.getElementById('current-temp').textContent = '72°F';
-                document.getElementById('current-condition').textContent = 'Partly Cloudy';
-                document.getElementById('current-details').textContent = 'Weather data temporarily unavailable';
-            }
-        }
+        // Get weather icon based on condition
+function getWeatherIcon(shortForecast) {
+    const forecast = shortForecast.toLowerCase();
+    
+    if (forecast.includes('sunny') || forecast.includes('clear')) {
+        return '☀️';
+    } else if (forecast.includes('partly cloudy') || forecast.includes('partly sunny')) {
+        return '⛅';
+    } else if (forecast.includes('cloudy') || forecast.includes('overcast')) {
+        return '☁️';
+    } else if (forecast.includes('rain') && forecast.includes('thunder')) {
+        return '⛈️';
+    } else if (forecast.includes('rain') || forecast.includes('shower')) {
+        return '🌧️';
+    } else if (forecast.includes('snow') && forecast.includes('rain')) {
+        return '🌨️';
+    } else if (forecast.includes('snow')) {
+        return '❄️';
+    } else if (forecast.includes('thunder') || forecast.includes('storm')) {
+        return '⛈️';
+    } else if (forecast.includes('fog')) {
+        return '🌫️';
+    } else if (forecast.includes('wind')) {
+        return '💨';
+    } else if (forecast.includes('haze') || forecast.includes('smoke')) {
+        return '🌫️';
+    } else {
+        return '🌤️'; // default
+    }
+}
 
-        // Update weekly forecast grid
-        function updateWeeklyForecast() {
-            const grid = document.getElementById('week-grid');
-            grid.innerHTML = '';
+// Fetch and update weather - USING DIRECT FORECAST URL
+async function updateWeather() {
+    try {
+        // Use direct forecast URL for Centennial area (Denver/Boulder forecast office)
+        const forecastResponse = await fetch('https://api.weather.gov/gridpoints/BOU/64,63/forecast');
+        const forecastData = await forecastResponse.json();
+        
+        weatherData = forecastData.properties.periods;
+        
+        // Update current/today
+        if (weatherData[0]) {
+            const current = weatherData[0];
+            const icon = getWeatherIcon(current.shortForecast);
             
-            if (!weatherData) return;
+            document.getElementById('current-temp').innerHTML = icon + ' ' + current.temperature + '°' + current.temperatureUnit;
+            document.getElementById('current-condition').textContent = current.shortForecast;
+            document.getElementById('current-details').textContent = current.detailedForecast;
             
-            // Show next 7 day periods (every other one to get days, not nights)
-            for (let i = 0; i < Math.min(14, weatherData.length); i += 2) {
-                const period = weatherData[i];
-                const card = document.createElement('div');
-                card.className = 'day-card';
-                card.innerHTML = `
-                    <div class="day-name">${period.name}</div>
-                    <div class="day-temp">${period.temperature}°${period.temperatureUnit}</div>
-                    <div class="day-condition">${period.shortForecast}</div>
-                `;
-                grid.appendChild(card);
-            }
+            document.getElementById('today-temp').innerHTML = icon + ' ' + current.temperature + '°' + current.temperatureUnit;
+            document.getElementById('today-condition').textContent = current.shortForecast;
+            document.getElementById('today-details').textContent = current.detailedForecast;
         }
+        
+        // Update tomorrow
+        if (weatherData[2]) {
+            const tomorrow = weatherData[2]; // Skip tonight, get tomorrow day
+            const icon = getWeatherIcon(tomorrow.shortForecast);
+            
+            document.getElementById('tomorrow-temp').innerHTML = icon + ' ' + tomorrow.temperature + '°' + tomorrow.temperatureUnit;
+            document.getElementById('tomorrow-condition').textContent = tomorrow.shortForecast;
+            document.getElementById('tomorrow-details').textContent = tomorrow.detailedForecast;
+        }
+        
+        // Update weekly
+        updateWeeklyForecast();
+        
+    } catch (error) {
+        console.error('Error fetching weather:', error);
+        // Use fallback data
+        document.getElementById('current-temp').innerHTML = '☀️ 72°F';
+        document.getElementById('current-condition').textContent = 'Partly Cloudy';
+        document.getElementById('current-details').textContent = 'Weather data temporarily unavailable';
+    }
+}
 
-        // Initialize
-        updateTime();
-        updateWeather();
+// Update weekly forecast grid with icons
+function updateWeeklyForecast() {
+    const grid = document.getElementById('week-grid');
+    grid.innerHTML = '';
+    
+    if (!weatherData) return;
+    
+    // Show next 7 day periods (every other one to get days, not nights)
+    for (let i = 0; i < Math.min(14, weatherData.length); i += 2) {
+        const period = weatherData[i];
+        const icon = getWeatherIcon(period.shortForecast);
+        const card = document.createElement('div');
+        card.className = 'day-card';
+        card.innerHTML = `
+            <div class="day-name">${period.name}</div>
+            <div style="font-size: 48px; margin: 10px 0;">${icon}</div>
+            <div class="day-temp">${period.temperature}°${period.temperatureUnit}</div>
+            <div class="day-condition">${period.shortForecast}</div>
+        `;
+        grid.appendChild(card);
+    }
+}
         
         // Set up intervals
         setInterval(updateTime, 1000);          // Update time every second
