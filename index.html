@@ -6,6 +6,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
+:root {
+  --navy: #061a33;
+  --blue: #0077c8;
+  --cyan: #35c7ff;
+  --orange: #ff9f1c;
+  --glass: rgba(255,255,255,.12);
+  --glass-border: rgba(255,255,255,.22);
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -16,140 +25,308 @@ body {
   height: 100vh;
   overflow: hidden;
   font-family: "Segoe UI", Arial, sans-serif;
-  background: linear-gradient(135deg, #071b3a, #0f4c81);
   color: white;
+  background:
+    radial-gradient(circle at top left, rgba(53,199,255,.30), transparent 35%),
+    radial-gradient(circle at bottom right, rgba(255,159,28,.14), transparent 35%),
+    linear-gradient(135deg, #061a33, #0b3d72 55%, #041326);
 }
 
 .header {
-  height: 90px;
+  height: 92px;
+  padding: 16px 34px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(0,0,0,.30);
+  border-bottom: 1px solid rgba(255,255,255,.15);
+}
+
+.logo-wrap {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 18px 36px;
-  background: rgba(0,0,0,.28);
+  gap: 26px;
 }
 
 .logo {
-  height: 52px;
+  height: 54px;
+  filter: drop-shadow(0 5px 12px rgba(0,0,0,.4));
 }
 
 .location {
-  font-size: 28px;
+  font-size: 30px;
   font-weight: 700;
 }
 
 .time {
-  font-size: 24px;
+  font-size: 25px;
   opacity: .95;
+}
+
+.layout {
+  height: calc(100vh - 152px);
+  padding: 24px 34px 78px;
+  display: grid;
+  grid-template-columns: 1fr 430px;
+  gap: 24px;
+}
+
+.left-stage {
+  position: relative;
+  min-width: 0;
 }
 
 .screen {
   display: none;
-  height: calc(100vh - 150px);
-  padding: 45px;
+  height: 100%;
 }
 
 .screen.active {
+  display: block;
+}
+
+.panel {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: 26px;
+  box-shadow: 0 24px 70px rgba(0,0,0,.28);
+  backdrop-filter: blur(14px);
+}
+
+.dashboard-grid {
+  height: 100%;
+  display: grid;
+  grid-template-rows: 1fr 205px;
+  gap: 20px;
+}
+
+.top-weather {
+  display: grid;
+  grid-template-columns: 1.25fr .85fr;
+  gap: 20px;
+}
+
+.current-panel {
+  padding: 34px;
   display: flex;
-}
-
-.weather-main {
-  width: 100%;
-  align-items: center;
-  justify-content: center;
   flex-direction: column;
-  text-align: center;
+  justify-content: center;
 }
 
-.label {
-  font-size: 46px;
-  font-weight: 300;
-  margin-bottom: 20px;
+.panel-title {
+  font-size: 28px;
+  font-weight: 600;
+  opacity: .85;
+  margin-bottom: 10px;
 }
 
-.icon {
-  font-size: 92px;
-  margin: 10px 0;
+.current-row {
+  display: flex;
+  align-items: center;
+  gap: 28px;
 }
 
-.temp {
-  font-size: 126px;
-  font-weight: 800;
-  line-height: 1;
+.weather-icon {
+  font-size: 102px;
+}
+
+.current-temp {
+  font-size: 132px;
+  line-height: .9;
+  font-weight: 850;
+  letter-spacing: -5px;
 }
 
 .condition {
-  font-size: 42px;
-  margin-top: 18px;
+  font-size: 40px;
+  margin-top: 16px;
+  font-weight: 650;
 }
 
 .details {
-  font-size: 24px;
-  max-width: 1000px;
-  margin-top: 18px;
+  margin-top: 16px;
+  font-size: 23px;
   line-height: 1.45;
   opacity: .9;
 }
 
-.week-grid {
-  width: 100%;
+.side-panel {
+  padding: 24px;
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  gap: 18px;
+}
+
+.forecast-block {
+  background: rgba(0,0,0,.18);
+  border-radius: 20px;
+  padding: 20px;
+  border: 1px solid rgba(255,255,255,.12);
+}
+
+.forecast-label {
+  font-size: 23px;
+  opacity: .8;
+  margin-bottom: 8px;
+}
+
+.forecast-main {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.forecast-icon {
+  font-size: 44px;
+}
+
+.forecast-temp {
+  font-size: 48px;
+  font-weight: 800;
+  color: var(--cyan);
+}
+
+.forecast-condition {
+  font-size: 22px;
+  margin-top: 8px;
+}
+
+.week-panel {
+  padding: 14px;
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 18px;
-  align-items: center;
+  gap: 14px;
 }
 
 .day-card {
-  min-height: 340px;
-  padding: 24px 16px;
-  background: rgba(255,255,255,.13);
+  background: rgba(0,0,0,.19);
   border-radius: 18px;
+  padding: 12px 8px;
   text-align: center;
-  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,.12);
+  overflow: hidden;
 }
 
 .day-name {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 700;
 }
 
 .day-icon {
-  font-size: 54px;
-  margin: 24px 0 12px;
+  font-size: 34px;
+  margin: 8px 0 4px;
 }
 
 .day-temp {
-  font-size: 42px;
-  font-weight: 700;
+  font-size: 30px;
+  font-weight: 800;
+  color: var(--cyan);
 }
 
 .day-condition {
-  margin-top: 14px;
-  font-size: 19px;
+  margin-top: 4px;
+  font-size: 15px;
   opacity: .9;
 }
 
-.video-box {
-  width: 100%;
+/* Announcements */
+
+.announcement-screen {
   height: 100%;
+  padding: 34px;
+}
+
+.announcement-screen h1 {
+  font-size: 52px;
+  margin-bottom: 28px;
+}
+
+.announcement-grid {
+  display: grid;
+  gap: 22px;
+}
+
+.announcement-item {
+  background: rgba(0,0,0,.22);
+  border: 1px solid rgba(255,255,255,.14);
   border-radius: 24px;
+  padding: 26px;
+}
+
+.announcement-item h2 {
+  font-size: 34px;
+  color: var(--orange);
+  margin-bottom: 8px;
+}
+
+.announcement-item p {
+  font-size: 27px;
+  line-height: 1.35;
+}
+
+/* Permanent Video Panel */
+
+.video-panel {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.video-header {
+  font-size: 29px;
+  font-weight: 800;
+  margin-bottom: 16px;
+}
+
+.video-box {
+  flex: 1;
+  border-radius: 22px;
+  overflow: hidden;
   background: rgba(0,0,0,.35);
+  border: 1px solid rgba(255,255,255,.16);
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-direction: column;
-  border: 2px dashed rgba(255,255,255,.35);
 }
 
-.video-box h1 {
-  font-size: 54px;
-  margin-bottom: 18px;
+.video-placeholder {
+  width: 100%;
+  height: 100%;
+  border: 2px dashed rgba(255,255,255,.28);
+  border-radius: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 25px;
+  line-height: 1.35;
+  padding: 24px;
+  opacity: .9;
 }
 
-.video-box p {
-  font-size: 28px;
-  opacity: .85;
+/*
+When you have a video file, replace the placeholder div with:
+
+<video class="news-video" autoplay muted loop playsinline>
+  <source src="news-video.mp4" type="video/mp4">
+</video>
+*/
+
+.news-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
+
+.video-footer {
+  margin-top: 14px;
+  font-size: 18px;
+  opacity: .75;
+  line-height: 1.35;
+}
+
+/* Ticker */
 
 .ticker {
   position: fixed;
@@ -157,18 +334,20 @@ body {
   bottom: 0;
   height: 60px;
   width: 100%;
-  background: rgba(0,0,0,.48);
+  overflow: hidden;
   display: flex;
   align-items: center;
-  overflow: hidden;
-  font-size: 26px;
+  background: rgba(0,0,0,.68);
+  border-top: 1px solid rgba(255,255,255,.18);
+  font-size: 27px;
   white-space: nowrap;
+  z-index: 20;
 }
 
 .ticker-content {
   display: inline-block;
   padding-left: 100%;
-  animation: scrollTicker 35s linear infinite;
+  animation: scrollTicker 42s linear infinite;
 }
 
 @keyframes scrollTicker {
@@ -176,12 +355,18 @@ body {
   to { transform: translateX(-100%); }
 }
 
+.badge {
+  color: var(--orange);
+  font-weight: 800;
+}
+
 .status {
   position: fixed;
-  right: 24px;
+  right: 22px;
   bottom: 72px;
   font-size: 14px;
   opacity: .65;
+  z-index: 21;
 }
 </style>
 </head>
@@ -189,53 +374,111 @@ body {
 <body>
 
 <header class="header">
-  <div style="display:flex; align-items:center; gap:24px;">
+  <div class="logo-wrap">
     <img class="logo" src="https://wg.scene7.com/is/image/wrenchgroup/updated-2023-logo-pl23wi001wg?fmt=png-alpha" alt="Plumbline Services">
     <div class="location">Centennial, CO</div>
   </div>
   <div class="time" id="time">Loading...</div>
 </header>
 
-<section class="screen active weather-main" id="current">
-  <div class="label">Current Conditions</div>
-  <div class="icon" id="currentIcon">🌤️</div>
-  <div class="temp" id="currentTemp">--°</div>
-  <div class="condition" id="currentCondition">Loading weather...</div>
-  <div class="details" id="currentDetails">Please wait.</div>
-</section>
+<main class="layout">
 
-<section class="screen weather-main" id="today">
-  <div class="label">Today's Forecast</div>
-  <div class="icon" id="todayIcon">🌤️</div>
-  <div class="temp" id="todayTemp">--°</div>
-  <div class="condition" id="todayCondition">Loading...</div>
-  <div class="details" id="todayDetails"></div>
-</section>
+  <section class="left-stage">
 
-<section class="screen weather-main" id="tomorrow">
-  <div class="label">Tomorrow's Forecast</div>
-  <div class="icon" id="tomorrowIcon">🌤️</div>
-  <div class="temp" id="tomorrowTemp">--°</div>
-  <div class="condition" id="tomorrowCondition">Loading...</div>
-  <div class="details" id="tomorrowDetails"></div>
-</section>
+    <!-- SCREEN 1: WEATHER DASHBOARD -->
+    <section class="screen active" id="screen-dashboard">
+      <div class="dashboard-grid">
 
-<section class="screen" id="week">
-  <div class="week-grid" id="weekGrid"></div>
-</section>
+        <div class="top-weather">
+          <section class="panel current-panel">
+            <div class="panel-title">Current Conditions</div>
 
-<section class="screen" id="video">
-  <div class="video-box">
-    <h1>Weekly News Video</h1>
-    <p>Video placeholder — we’ll connect this later.</p>
-  </div>
-</section>
+            <div class="current-row">
+              <div class="weather-icon" id="currentIcon">🌤️</div>
+              <div class="current-temp" id="currentTemp">--°</div>
+            </div>
+
+            <div class="condition" id="currentCondition">Loading weather...</div>
+            <div class="details" id="currentDetails">Please wait.</div>
+          </section>
+
+          <section class="panel side-panel">
+            <div class="forecast-block">
+              <div class="forecast-label">Today</div>
+              <div class="forecast-main">
+                <div class="forecast-icon" id="todayIcon">🌤️</div>
+                <div class="forecast-temp" id="todayTemp">--°</div>
+              </div>
+              <div class="forecast-condition" id="todayCondition">Loading...</div>
+            </div>
+
+            <div class="forecast-block">
+              <div class="forecast-label">Tomorrow</div>
+              <div class="forecast-main">
+                <div class="forecast-icon" id="tomorrowIcon">🌤️</div>
+                <div class="forecast-temp" id="tomorrowTemp">--°</div>
+              </div>
+              <div class="forecast-condition" id="tomorrowCondition">Loading...</div>
+            </div>
+          </section>
+        </div>
+
+        <section class="panel week-panel" id="weekGrid"></section>
+
+      </div>
+    </section>
+
+    <!-- SCREEN 2: ANNOUNCEMENTS -->
+    <section class="screen" id="screen-announcements">
+      <section class="panel announcement-screen">
+        <h1>Office Announcements</h1>
+
+        <div class="announcement-grid">
+          <div class="announcement-item">
+            <h2>🚚 Fleet Reminder</h2>
+            <p>Gas receipts are due by Friday.</p>
+          </div>
+
+          <div class="announcement-item">
+            <h2>🎉 Summer Party</h2>
+            <p>Summer party coming up on 7/11. More details coming soon.</p>
+          </div>
+
+          <div class="announcement-item">
+            <h2>📢 Coming Soon</h2>
+            <p>Announcements will eventually feed from Microsoft Lists or a manager submission form.</p>
+          </div>
+        </div>
+      </section>
+    </section>
+
+  </section>
+
+  <!-- PERMANENT NEWS VIDEO AREA -->
+  <aside class="panel video-panel">
+    <div class="video-header">Weekly News</div>
+
+    <div class="video-box">
+      <div class="video-placeholder">
+        News video will play here<br><br>
+        Looping video placeholder
+      </div>
+    </div>
+
+    <div class="video-footer">
+      This panel stays visible while weather and announcements rotate.
+    </div>
+  </aside>
+
+</main>
 
 <div class="ticker">
   <div class="ticker-content" id="tickerText">
-    🚚 Gas receipts due Friday &nbsp;&nbsp; • &nbsp;&nbsp;
-    🎉 Summer Party coming up 7/11 &nbsp;&nbsp; • &nbsp;&nbsp;
-    📢 Announcements will eventually come from a Microsoft form/list
+    <span class="badge">🚚 Reminder:</span> Gas receipts due Friday
+    &nbsp;&nbsp; • &nbsp;&nbsp;
+    <span class="badge">🎉 Event:</span> Summer Party coming up 7/11
+    &nbsp;&nbsp; • &nbsp;&nbsp;
+    <span class="badge">📢 News:</span> Announcements will eventually come from Microsoft Lists
   </div>
 </div>
 
@@ -246,14 +489,18 @@ const LAT = 39.5807;
 const LON = -104.8772;
 const TIMEZONE = "America/Denver";
 
-const screens = ["current", "today", "tomorrow", "week", "video"];
-let screenIndex = 0;
+const screens = [
+  "screen-dashboard",
+  "screen-announcements"
+];
+
+let currentScreenIndex = 0;
 
 function updateClock() {
   const now = new Date();
   document.getElementById("time").textContent = now.toLocaleString("en-US", {
     timeZone: TIMEZONE,
-    weekday: "short",
+    weekday: "long",
     month: "short",
     day: "numeric",
     hour: "numeric",
@@ -262,23 +509,36 @@ function updateClock() {
   });
 }
 
+function rotateScreen() {
+  document.getElementById(screens[currentScreenIndex]).classList.remove("active");
+  currentScreenIndex = (currentScreenIndex + 1) % screens.length;
+  document.getElementById(screens[currentScreenIndex]).classList.add("active");
+}
+
 function iconFor(text = "") {
   const f = text.toLowerCase();
+
   if (f.includes("thunder")) return "⛈️";
   if (f.includes("snow")) return "❄️";
   if (f.includes("rain") || f.includes("showers")) return "🌧️";
   if (f.includes("fog") || f.includes("haze") || f.includes("smoke")) return "🌫️";
   if (f.includes("wind")) return "💨";
-  if (f.includes("cloudy")) return "☁️";
   if (f.includes("partly") || f.includes("mostly sunny")) return "⛅";
+  if (f.includes("cloudy") || f.includes("overcast")) return "☁️";
   if (f.includes("sunny") || f.includes("clear")) return "☀️";
+
   return "🌤️";
 }
 
-function showNextScreen() {
-  document.getElementById(screens[screenIndex]).classList.remove("active");
-  screenIndex = (screenIndex + 1) % screens.length;
-  document.getElementById(screens[screenIndex]).classList.add("active");
+function cToF(c) {
+  return Math.round((c * 9/5) + 32);
+}
+
+function shortenForecast(text = "") {
+  if (text.length > 26) {
+    return text.substring(0, 26) + "...";
+  }
+  return text;
 }
 
 async function getWeather() {
@@ -306,7 +566,10 @@ async function getWeather() {
     updateWeek(periods);
 
     document.getElementById("status").textContent =
-      `Weather updated ${new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}`;
+      "Weather updated " + new Date().toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit"
+      });
 
   } catch (err) {
     console.error(err);
@@ -314,10 +577,6 @@ async function getWeather() {
     document.getElementById("currentDetails").textContent = "Unable to load NOAA weather data.";
     document.getElementById("status").textContent = "Weather update failed";
   }
-}
-
-function cToF(c) {
-  return Math.round((c * 9/5) + 32);
 }
 
 function updateCurrent(obsData, fallbackPeriod) {
@@ -328,9 +587,19 @@ function updateCurrent(obsData, fallbackPeriod) {
   document.getElementById("currentIcon").textContent = iconFor(text);
   document.getElementById("currentTemp").textContent =
     tempC !== null ? `${cToF(tempC)}°` : `${fallbackPeriod.temperature}°`;
+
   document.getElementById("currentCondition").textContent = text || "Current Conditions";
+
+  const windMph = props.windSpeed.value
+    ? Math.round(props.windSpeed.value * 2.237) + " mph"
+    : "N/A";
+
+  const humidity = props.relativeHumidity.value
+    ? Math.round(props.relativeHumidity.value) + "%"
+    : "N/A";
+
   document.getElementById("currentDetails").textContent =
-    `Wind: ${props.windSpeed.value ? Math.round(props.windSpeed.value * 2.237) + " mph" : "N/A"} • Humidity: ${props.relativeHumidity.value ? Math.round(props.relativeHumidity.value) + "%" : "N/A"}`;
+    `Wind: ${windMph} • Humidity: ${humidity}`;
 }
 
 function updateToday(periods) {
@@ -338,17 +607,16 @@ function updateToday(periods) {
 
   document.getElementById("todayIcon").textContent = iconFor(today.shortForecast);
   document.getElementById("todayTemp").textContent = `${today.temperature}°`;
-  document.getElementById("todayCondition").textContent = today.shortForecast;
-  document.getElementById("todayDetails").textContent = today.detailedForecast;
+  document.getElementById("todayCondition").textContent = shortenForecast(today.shortForecast);
 }
 
 function updateTomorrow(periods) {
-  const tomorrow = periods.find((p, index) => index > 0 && p.isDaytime) || periods[2];
+  const firstDay = periods.findIndex(p => p.isDaytime);
+  const tomorrow = periods.slice(firstDay + 1).find(p => p.isDaytime) || periods[2];
 
   document.getElementById("tomorrowIcon").textContent = iconFor(tomorrow.shortForecast);
   document.getElementById("tomorrowTemp").textContent = `${tomorrow.temperature}°`;
-  document.getElementById("tomorrowCondition").textContent = tomorrow.shortForecast;
-  document.getElementById("tomorrowDetails").textContent = tomorrow.detailedForecast;
+  document.getElementById("tomorrowCondition").textContent = shortenForecast(tomorrow.shortForecast);
 }
 
 function updateWeek(periods) {
@@ -360,12 +628,14 @@ function updateWeek(periods) {
   days.forEach(day => {
     const card = document.createElement("div");
     card.className = "day-card";
+
     card.innerHTML = `
       <div class="day-name">${day.name}</div>
       <div class="day-icon">${iconFor(day.shortForecast)}</div>
       <div class="day-temp">${day.temperature}°</div>
-      <div class="day-condition">${day.shortForecast}</div>
+      <div class="day-condition">${shortenForecast(day.shortForecast)}</div>
     `;
+
     grid.appendChild(card);
   });
 }
@@ -374,7 +644,7 @@ updateClock();
 getWeather();
 
 setInterval(updateClock, 1000);
-setInterval(showNextScreen, 15000);
+setInterval(rotateScreen, 25000);
 setInterval(getWeather, 10 * 60 * 1000);
 </script>
 
