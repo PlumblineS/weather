@@ -38,18 +38,26 @@ body {
   100% { background-position: 20% 100%; }
 }
 
+/* Safe area leaves room so burn-in movement does not clip content */
+.screen-safe {
+  height: calc(100vh - 60px);
+  padding: 8px;
+  overflow: hidden;
+}
+
+/* Burn-in protection: tiny movement, but not enough to shove ticker off-screen */
 .burn-in-shift {
-  height: 100vh;
-  animation: pixelShift 360s infinite alternate ease-in-out;
+  height: 100%;
+  animation: pixelShift 420s infinite alternate ease-in-out;
 }
 
 @keyframes pixelShift {
   0% { transform: translate(0, 0); }
-  20% { transform: translate(8px, -6px); }
-  40% { transform: translate(-7px, 5px); }
-  60% { transform: translate(6px, 8px); }
-  80% { transform: translate(-9px, -5px); }
-  100% { transform: translate(5px, -8px); }
+  20% { transform: translate(4px, -3px); }
+  40% { transform: translate(-4px, 3px); }
+  60% { transform: translate(3px, 4px); }
+  80% { transform: translate(-4px, -3px); }
+  100% { transform: translate(3px, -4px); }
 }
 
 .dim-overlay {
@@ -66,23 +74,24 @@ body {
 }
 
 .header {
-  height: 88px;
-  padding: 14px 32px;
+  height: 76px;
+  padding: 10px 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   background: rgba(0,0,0,.30);
-  border-bottom: 1px solid rgba(255,255,255,.15);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 18px;
 }
 
 .logo-wrap {
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 22px;
 }
 
 .logo {
-  height: 52px;
+  height: 50px;
   filter: drop-shadow(0 5px 12px rgba(0,0,0,.4));
 }
 
@@ -97,17 +106,17 @@ body {
 }
 
 .layout {
-  height: calc(100vh - 148px);
-  padding: 22px 32px 76px;
+  height: calc(100% - 76px);
+  padding-top: 18px;
   display: grid;
-  grid-template-columns: 1fr 1.15fr;
-  gap: 24px;
+  grid-template-columns: 1fr 1.12fr;
+  gap: 22px;
 }
 
 .panel {
   background: var(--glass);
   border: 1px solid var(--glass-border);
-  border-radius: 26px;
+  border-radius: 24px;
   box-shadow: 0 24px 70px rgba(0,0,0,.28);
   backdrop-filter: blur(14px);
   overflow: hidden;
@@ -128,26 +137,38 @@ body {
   to { transform: translate(10%, 10%) rotate(360deg); }
 }
 
+/* LEFT COLUMN */
+
 .left-column {
   height: 100%;
   display: grid;
-  grid-template-rows: 1fr 155px;
-  gap: 18px;
+  grid-template-rows: minmax(0, 1fr) 190px;
+  gap: 16px;
 }
+
+/* WEATHER */
 
 .weather-panel {
   padding: 26px;
   display: grid;
   grid-template-rows: auto 1fr auto;
+  min-height: 0;
 }
 
 .panel-title {
   font-size: 24px;
   font-weight: 700;
   opacity: .88;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   position: relative;
   z-index: 1;
+}
+
+.current-weather-center {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 0;
 }
 
 .current-row {
@@ -160,11 +181,11 @@ body {
 }
 
 .weather-icon {
-  font-size: 72px;
+  font-size: 70px;
 }
 
 .current-temp {
-  font-size: 88px;
+  font-size: 84px;
   line-height: .95;
   font-weight: 850;
   letter-spacing: -4px;
@@ -189,7 +210,7 @@ body {
 }
 
 .mini-forecast {
-  margin-top: 16px;
+  margin-top: 14px;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 14px;
@@ -198,7 +219,7 @@ body {
 }
 
 .forecast-block {
-  background: rgba(0,0,0,.18);
+  background: rgba(0,0,0,.20);
   border-radius: 18px;
   padding: 13px;
   border: 1px solid rgba(255,255,255,.12);
@@ -232,56 +253,72 @@ body {
   opacity: .92;
 }
 
+/* FORECAST STRIP */
+
 .week-panel {
   padding: 14px 16px;
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-height: 0;
+}
+
+.week-panel .panel-title {
+  margin-bottom: 8px;
 }
 
 .week-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 9px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
   position: relative;
   z-index: 1;
+  min-height: 0;
 }
 
 .day-card {
-  background: rgba(0,0,0,.19);
+  background: rgba(0,0,0,.20);
   border-radius: 16px;
   padding: 8px 6px;
   text-align: center;
   border: 1px solid rgba(255,255,255,.12);
   overflow: hidden;
+  display: grid;
+  grid-template-rows: auto auto auto auto;
+  align-content: center;
 }
 
 .day-name {
   font-size: 14px;
   font-weight: 700;
+  line-height: 1.1;
 }
 
 .day-icon {
   font-size: 24px;
-  margin: 5px 0 2px;
+  margin: 4px 0 2px;
 }
 
 .day-temp {
-  font-size: 23px;
+  font-size: 22px;
   font-weight: 800;
   color: var(--cyan);
+  line-height: 1.1;
 }
 
 .day-condition {
-  margin-top: 2px;
+  margin-top: 3px;
   font-size: 11px;
+  line-height: 1.15;
   opacity: .9;
 }
+
+/* RIGHT COLUMN */
 
 .right-column {
   height: 100%;
   display: grid;
-  grid-template-rows: .75fr 1fr;
-  gap: 18px;
+  grid-template-rows: .78fr 1fr;
+  gap: 16px;
 }
 
 .video-panel,
@@ -316,7 +353,7 @@ body {
 .photo-placeholder {
   width: 100%;
   height: 100%;
-  border: 2px dashed rgba(255,255,255,.28);
+  border: 2px dashed rgba(255,255,255,.25);
   border-radius: 22px;
   display: flex;
   align-items: center;
@@ -359,6 +396,8 @@ body {
   font-weight: 700;
 }
 
+/* TICKER */
+
 .ticker {
   position: fixed;
   left: 0;
@@ -368,7 +407,7 @@ body {
   overflow: hidden;
   display: flex;
   align-items: center;
-  background: rgba(0,0,0,.70);
+  background: rgba(0,0,0,.74);
   border-top: 1px solid rgba(255,255,255,.18);
   font-size: 27px;
   white-space: nowrap;
@@ -394,7 +433,7 @@ body {
 .status {
   position: fixed;
   right: 22px;
-  bottom: 72px;
+  bottom: 68px;
   font-size: 13px;
   opacity: .45;
   z-index: 21;
@@ -404,102 +443,97 @@ body {
 
 <body>
 
-<div class="burn-in-shift">
+<div class="screen-safe">
+  <div class="burn-in-shift">
 
-<header class="header">
-  <div class="logo-wrap">
-    <img class="logo" src="https://wg.scene7.com/is/image/wrenchgroup/updated-2023-logo-pl23wi001wg?fmt=png-alpha" alt="Plumbline Services">
-    <div class="location">Centennial, CO</div>
+    <header class="header">
+      <div class="logo-wrap">
+        <img class="logo" src="https://wg.scene7.com/is/image/wrenchgroup/updated-2023-logo-pl23wi001wg?fmt=png-alpha" alt="Plumbline Services">
+        <div class="location">Centennial, CO</div>
+      </div>
+      <div class="time" id="time">Loading...</div>
+    </header>
+
+    <main class="layout">
+
+      <section class="left-column">
+
+        <section class="panel weather-panel">
+          <div class="panel-title">Current Weather</div>
+
+          <div class="current-weather-center">
+            <div class="current-row">
+              <div class="weather-icon" id="currentIcon">🌤️</div>
+              <div class="current-temp" id="currentTemp">--°</div>
+            </div>
+
+            <div class="condition" id="currentCondition">Loading weather...</div>
+            <div class="details" id="currentDetails">Please wait.</div>
+          </div>
+
+          <div class="mini-forecast">
+            <div class="forecast-block">
+              <div class="forecast-label">Today</div>
+              <div class="forecast-main">
+                <div class="forecast-icon" id="todayIcon">🌤️</div>
+                <div class="forecast-temp" id="todayTemp">--°</div>
+              </div>
+              <div class="forecast-condition" id="todayCondition">Loading...</div>
+            </div>
+
+            <div class="forecast-block">
+              <div class="forecast-label">Tomorrow</div>
+              <div class="forecast-main">
+                <div class="forecast-icon" id="tomorrowIcon">🌤️</div>
+                <div class="forecast-temp" id="tomorrowTemp">--°</div>
+              </div>
+              <div class="forecast-condition" id="tomorrowCondition">Loading...</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel week-panel">
+          <div class="panel-title">5-Day Forecast</div>
+          <div class="week-grid" id="weekGrid"></div>
+        </section>
+
+      </section>
+
+      <section class="right-column">
+
+        <section class="panel video-panel">
+          <div class="video-header">Weekly News</div>
+          <div class="video-box" id="videoBox">
+            <div class="video-placeholder">
+              Weekly YouTube video<br><br>
+              Add video URL later from form
+            </div>
+          </div>
+        </section>
+
+        <section class="panel photo-panel">
+          <div class="photo-header">Company Photos</div>
+          <div class="photo-box" id="photoBox">
+            <div class="photo-placeholder">
+              Photo rotation placeholder<br><br>
+              Supports 30+ images<br>
+              fading every 3 seconds
+            </div>
+          </div>
+        </section>
+
+      </section>
+
+    </main>
+
   </div>
-  <div class="time" id="time">Loading...</div>
-</header>
-
-<main class="layout">
-
-  <section class="left-column">
-
-    <section class="panel weather-panel">
-      <div class="panel-title">Current Weather</div>
-
-      <div>
-        <div class="current-row">
-          <div class="weather-icon" id="currentIcon">🌤️</div>
-          <div class="current-temp" id="currentTemp">--°</div>
-        </div>
-
-        <div class="condition" id="currentCondition">Loading weather...</div>
-        <div class="details" id="currentDetails">Please wait.</div>
-      </div>
-
-      <div class="mini-forecast">
-        <div class="forecast-block">
-          <div class="forecast-label">Today</div>
-          <div class="forecast-main">
-            <div class="forecast-icon" id="todayIcon">🌤️</div>
-            <div class="forecast-temp" id="todayTemp">--°</div>
-          </div>
-          <div class="forecast-condition" id="todayCondition">Loading...</div>
-        </div>
-
-        <div class="forecast-block">
-          <div class="forecast-label">Tomorrow</div>
-          <div class="forecast-main">
-            <div class="forecast-icon" id="tomorrowIcon">🌤️</div>
-            <div class="forecast-temp" id="tomorrowTemp">--°</div>
-          </div>
-          <div class="forecast-condition" id="tomorrowCondition">Loading...</div>
-        </div>
-      </div>
-    </section>
-
-    <section class="panel week-panel">
-      <div class="panel-title">5-Day Forecast</div>
-      <div class="week-grid" id="weekGrid"></div>
-    </section>
-
-  </section>
-
-  <section class="right-column">
-
-    <section class="panel video-panel">
-      <div class="video-header">Weekly News</div>
-      <div class="video-box" id="videoBox">
-        <div class="video-placeholder">
-          Weekly YouTube video<br><br>
-          Add video URL later from form
-        </div>
-      </div>
-    </section>
-
-    <section class="panel photo-panel">
-      <div class="photo-header">Company Photos</div>
-      <div class="photo-box" id="photoBox">
-        <div class="photo-placeholder">
-          Photo rotation placeholder<br><br>
-          Supports 30+ images<br>
-          fading every 3 seconds
-        </div>
-      </div>
-    </section>
-
-  </section>
-
-</main>
+</div>
 
 <div class="ticker">
-  <div class="ticker-content" id="tickerText">
-    <span class="badge">🚚 Reminder:</span> Gas receipts due Friday
-    &nbsp;&nbsp; • &nbsp;&nbsp;
-    <span class="badge">🎉 Event:</span> Summer Party coming up 7/11
-    &nbsp;&nbsp; • &nbsp;&nbsp;
-    <span class="badge">📢 News:</span> Announcements will eventually come from your form
-  </div>
+  <div class="ticker-content" id="tickerText">No active announcements</div>
 </div>
 
 <div class="status" id="status">Weather not updated yet</div>
-
-</div>
-
 <div class="dim-overlay" id="dimOverlay"></div>
 
 <script>
