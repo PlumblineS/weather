@@ -461,33 +461,22 @@ const LAT = 39.5807;
 const LON = -104.8772;
 const TIMEZONE = "America/Denver";
 
+/*
+Paste your published Google Sheet CSV URL below.
+
+It should look like:
+https://docs.google.com/spreadsheets/d/e/2PACX-.../pub?output=csv
+
+Do not use the forms.gle link here.
+*/
+
+const ANNOUNCEMENT_CSV_URL = "PASTE-YOUR-PUBLISHED-GOOGLE-SHEET-CSV-LINK-HERE";
+
 const ENABLE_OFF_HOURS_DIM = true;
 const DIM_START_HOUR = 18;
 const DIM_END_HOUR = 6;
 
-/*
-Later:
-Paste YouTube embed URL here, or load it from a form/sheet.
-
-Normal YouTube:
-https://www.youtube.com/watch?v=VIDEO_ID
-
-Embed format:
-https://www.youtube.com/embed/VIDEO_ID?autoplay=1&mute=1&loop=1&playlist=VIDEO_ID
-*/
-
-const ANNOUNCEMENT_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSxKJOdXWka7Y6CBllcb37RrSw-Av5DNVJ4hcHahFE22EYXDIq1Kvgwnokt7JfVeYd_b8AvhDyUpEoj/pub?output=csv";  
 const YOUTUBE_EMBED_URL = "";
-
-/*
-Photo rotation:
-Create a /photos folder in GitHub and add image files.
-
-Example:
-photos/photo1.jpg
-photos/photo2.jpg
-photos/photo3.jpg
-*/
 
 const PHOTO_SLIDES = [
   // "photos/photo1.jpg",
@@ -552,13 +541,29 @@ function shortenForecast(text = "") {
   return text;
 }
 
-function dateKey(date) {
-  return date.toLocaleDateString("en-CA", {
+function denverDateParts(date) {
+  const parts = new Intl.DateTimeFormat("en-US", {
     timeZone: TIMEZONE,
     year: "numeric",
     month: "2-digit",
     day: "2-digit"
-  });
+  }).formatToParts(date);
+
+  return {
+    year: Number(parts.find(p => p.type === "year").value),
+    month: Number(parts.find(p => p.type === "month").value),
+    day: Number(parts.find(p => p.type === "day").value)
+  };
+}
+
+function dateKey(date) {
+  const parts = denverDateParts(date);
+  return `${parts.year}-${String(parts.month).padStart(2, "0")}-${String(parts.day).padStart(2, "0")}`;
+}
+
+function todayInDenver() {
+  const parts = denverDateParts(new Date());
+  return new Date(parts.year, parts.month - 1, parts.day);
 }
 
 function weekdayLabel(dateString) {
@@ -656,6 +661,221 @@ function updateWeek(periods) {
   });
 }
 
+function escapeHtml(value) {
+  return String(value || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function parseCsv(csvText) {
+  const rows = [];
+  let row = [];
+  let value = "";
+  let insideQuotes = false;
+
+  for (let i = 0; i < csvText.length; i++) {
+    const char = csvText[i];
+    const nextChar = csvText[i + 1];
+
+    if (char === '"' && insideQuotes && nextChar === '"') {
+      value += '"';
+      i++;
+    } else if (char === '"') {
+      insideQuotes = !insideQuotes;
+    } else if (char === "," && !insideQuotes) {
+      row.push(value.trim());
+      value = "";
+    } else if ((char === "\n" || char === "\r") && !insideQuotes) {
+      if (value || row.length) {
+        row.push(value.trim());
+        rows.push(row);
+        row = [];
+        value = "";
+      }
+      if (char === "\r" && nextChar === "\n") i++;
+    } else {
+      value += char;
+    }
+  }
+
+  if (value || row.length) {
+    row.push(value.trim());
+    rows.push(row);
+  }
+
+  return rows.filter(r => r.some(cell => String(cell).trim() !== ""));
+}
+
+function parseSheetDate(value) {
+  if (!value) return null;
+
+  const cleaned = String(value).trim();
+
+  const usMatch = cleaned.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+  if (usMatch) {
+    let year = Number(usMatch[3]);
+    if (year < 100) year += 2000;
+
+    return new Date(
+      year,
+      Number(usMatch[1]) - 1,
+      Number(usMatch[2])
+    );
+  }
+
+  const isoMatch = cleaned.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (isoMatch) {
+    return new Date(
+      Number(isoMatch[1]),
+      Number(isoMatch[2]) - 1,
+      Number(isoMatch[3])
+    );
+  }
+
+  const parsed = new Date(cleaned);
+  if (!isNaN(parsed)) {
+    return new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
+  }
+
+  return null;
+}
+
+function normalizeHeader(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+}
+
+function findColumn(headers, possibleNames) {
+  const normalizedHeaders = headers.map(normalizeHeader);
+
+  for (const name of possibleNames) {
+    const normalizedName = normalizeHeader(name);
+    const exactIndex = normalizedHeaders.indexOf(normalizedName);
+
+    if (exactIndex !== -1) {
+      return exactIndex;
+    }
+  }
+
+  return -1;
+}
+
+function setTickerMessage(html, shouldScroll) {
+  const ticker = document.getElementById("tickerText");
+
+  ticker.innerHTML = html;
+  ticker.classList.toggle("scrolling", shouldScroll);
+}
+
+async function loadAnnouncements() {
+  if (
+    !ANNOUNCEMENT_CSV_URL ||
+    ANNOUNCEMENT_CSV_URL.includes("PASTE-YOUR-PUBLISHED-GOOGLE-SHEET-CSV-LINK-HERE")
+  ) {
+    setTickerMessage("No active announcements", false);
+    return;
+  }
+
+  try {
+    const cacheBuster = ANNOUNCEMENT_CSV_URL.includes("?") ? "&" : "?";
+    const response = await fetch(`${ANNOUNCEMENT_CSV_URL}${cacheBuster}t=${Date.now()}`);
+
+    if (!response.ok) {
+      throw new Error(`Announcement sheet failed: ${response.status}`);
+    }
+
+    const csvText = await response.text();
+
+    if (!csvText || csvText.toLowerCase().includes("<html")) {
+      throw new Error("Announcement URL did not return CSV data.");
+    }
+
+    const rows = parseCsv(csvText);
+
+    if (rows.length < 2) {
+      setTickerMessage("No active announcements", false);
+      return;
+    }
+
+    const headers = rows[0];
+
+    const titleIndex = findColumn(headers, [
+      "Announcement Title",
+      "Title"
+    ]);
+
+    const messageIndex = findColumn(headers, [
+      "Announcement Message",
+      "Message"
+    ]);
+
+    const startIndex = findColumn(headers, [
+      "Start Date",
+      "Start"
+    ]);
+
+    const endIndex = findColumn(headers, [
+      "End Date",
+      "End"
+    ]);
+
+    if (titleIndex === -1 || messageIndex === -1) {
+      throw new Error("Could not find announcement title/message columns.");
+    }
+
+    const today = todayInDenver();
+
+    const activeAnnouncements = rows.slice(1)
+      .map(row => {
+        return {
+          title: row[titleIndex] || "",
+          message: row[messageIndex] || "",
+          startDate: startIndex >= 0 ? parseSheetDate(row[startIndex]) : null,
+          endDate: endIndex >= 0 ? parseSheetDate(row[endIndex]) : null
+        };
+      })
+      .filter(item => item.title || item.message)
+      .filter(item => {
+        const startsOk = !item.startDate || item.startDate <= today;
+        const endsOk = !item.endDate || item.endDate >= today;
+
+        return startsOk && endsOk;
+      });
+
+    if (!activeAnnouncements.length) {
+      setTickerMessage("No active announcements", false);
+      return;
+    }
+
+    const tickerHtml = activeAnnouncements.map(item => {
+      const safeTitle = escapeHtml(item.title);
+      const safeMessage = escapeHtml(item.message);
+
+      if (safeTitle && safeMessage) {
+        return `<span class="badge">📢 ${safeTitle}:</span> ${safeMessage}`;
+      }
+
+      return `<span class="badge">📢</span> ${safeTitle || safeMessage}`;
+    }).join("&nbsp;&nbsp; • &nbsp;&nbsp;");
+
+    const plainTextLength = activeAnnouncements
+      .map(item => `${item.title}: ${item.message}`)
+      .join(" • ")
+      .length;
+
+    setTickerMessage(tickerHtml, activeAnnouncements.length > 1 || plainTextLength > 70);
+
+  } catch (err) {
+    console.error(err);
+    setTickerMessage("Announcements unavailable", false);
+  }
+}
+
 function setupVideo() {
   const videoBox = document.getElementById("videoBox");
 
@@ -703,11 +923,13 @@ function setupPhotoRotation() {
 
 updateClock();
 getWeather();
+loadAnnouncements();
 setupVideo();
 setupPhotoRotation();
 
 setInterval(updateClock, 1000);
 setInterval(getWeather, 10 * 60 * 1000);
+setInterval(loadAnnouncements, 5 * 60 * 1000);
 </script>
 
 </body>
