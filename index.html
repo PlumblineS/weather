@@ -38,14 +38,12 @@ body {
   100% { background-position: 20% 100%; }
 }
 
-/* Safe area leaves room so burn-in movement does not clip content */
 .screen-safe {
   height: calc(100vh - 60px);
   padding: 8px;
   overflow: hidden;
 }
 
-/* Burn-in protection: tiny movement, but not enough to shove ticker off-screen */
 .burn-in-shift {
   height: 100%;
   animation: pixelShift 420s infinite alternate ease-in-out;
@@ -109,8 +107,8 @@ body {
   height: calc(100% - 76px);
   padding-top: 18px;
   display: grid;
-  grid-template-columns: 1fr 1.12fr;
-  gap: 22px;
+  grid-template-columns: 1.05fr .95fr;
+  gap: 18px;
 }
 
 .panel {
@@ -137,139 +135,109 @@ body {
   to { transform: translate(10%, 10%) rotate(360deg); }
 }
 
-/* LEFT COLUMN */
-
-.left-column {
-  height: 100%;
-  display: grid;
-  grid-template-rows: minmax(0, 1fr) 190px;
-  gap: 16px;
-}
-
-/* WEATHER */
-
-.weather-panel {
-  padding: 26px;
-  display: grid;
-  grid-template-rows: auto 1fr auto;
-  min-height: 0;
-}
-
 .panel-title {
-  font-size: 24px;
-  font-weight: 700;
-  opacity: .88;
-  margin-bottom: 8px;
+  font-size: 27px;
+  font-weight: 800;
+  margin-bottom: 12px;
   position: relative;
   z-index: 1;
 }
 
-.current-weather-center {
+/* LEFT: WEEKLY NEWS */
+
+.news-panel {
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   min-height: 0;
 }
 
-.current-row {
+.news-box {
+  flex: 1;
+  border-radius: 22px;
+  overflow: hidden;
+  background: rgba(0,0,0,.38);
+  border: 1px solid rgba(255,255,255,.16);
+  position: relative;
+  z-index: 1;
+}
+
+.video-placeholder {
+  width: 100%;
+  height: 100%;
+  border: 2px dashed rgba(255,255,255,.25);
+  border-radius: 22px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 22px;
+  text-align: center;
+  font-size: 30px;
+  line-height: 1.35;
+  padding: 34px;
+  opacity: .9;
+}
+
+.youtube-frame {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* RIGHT COLUMN */
+
+.right-column {
+  height: 100%;
+  display: grid;
+  grid-template-rows: .46fr .54fr;
+  gap: 18px;
+}
+
+/* WEATHER TOP RIGHT */
+
+.weather-panel {
+  padding: 18px;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  min-height: 0;
+}
+
+.weather-main {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 18px;
+  align-items: center;
   position: relative;
   z-index: 1;
 }
 
 .weather-icon {
-  font-size: 70px;
+  font-size: 62px;
 }
 
 .current-temp {
-  font-size: 84px;
+  font-size: 70px;
   line-height: .95;
   font-weight: 850;
-  letter-spacing: -4px;
+  letter-spacing: -3px;
 }
 
 .condition {
-  text-align: center;
-  font-size: 28px;
-  margin-top: 6px;
-  font-weight: 650;
-  position: relative;
-  z-index: 1;
+  font-size: 26px;
+  font-weight: 700;
+  margin-top: 2px;
 }
 
 .details {
-  text-align: center;
-  margin-top: 8px;
-  font-size: 18px;
-  opacity: .9;
-  position: relative;
-  z-index: 1;
-}
-
-.mini-forecast {
-  margin-top: 14px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-  position: relative;
-  z-index: 1;
-}
-
-.forecast-block {
-  background: rgba(0,0,0,.20);
-  border-radius: 18px;
-  padding: 13px;
-  border: 1px solid rgba(255,255,255,.12);
-}
-
-.forecast-label {
-  font-size: 16px;
-  opacity: .8;
-  margin-bottom: 5px;
-}
-
-.forecast-main {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.forecast-icon {
-  font-size: 27px;
-}
-
-.forecast-temp {
-  font-size: 31px;
-  font-weight: 800;
-  color: var(--cyan);
-}
-
-.forecast-condition {
-  font-size: 14px;
+  font-size: 17px;
   margin-top: 5px;
-  opacity: .92;
+  opacity: .9;
 }
 
-/* FORECAST STRIP */
-
-.week-panel {
-  padding: 14px 16px;
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
-  min-height: 0;
-}
-
-.week-panel .panel-title {
-  margin-bottom: 8px;
-}
-
-.week-grid {
+.forecast-strip {
+  margin-top: 12px;
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 10px;
+  gap: 8px;
   position: relative;
   z-index: 1;
   min-height: 0;
@@ -277,8 +245,8 @@ body {
 
 .day-card {
   background: rgba(0,0,0,.20);
-  border-radius: 16px;
-  padding: 8px 6px;
+  border-radius: 15px;
+  padding: 8px 5px;
   text-align: center;
   border: 1px solid rgba(255,255,255,.12);
   overflow: hidden;
@@ -289,39 +257,31 @@ body {
 
 .day-name {
   font-size: 14px;
-  font-weight: 700;
-  line-height: 1.1;
+  font-weight: 800;
+  line-height: 1.05;
 }
 
 .day-icon {
-  font-size: 24px;
-  margin: 4px 0 2px;
+  font-size: 22px;
+  margin: 3px 0 1px;
 }
 
 .day-temp {
-  font-size: 22px;
+  font-size: 21px;
   font-weight: 800;
   color: var(--cyan);
   line-height: 1.1;
 }
 
 .day-condition {
-  margin-top: 3px;
-  font-size: 11px;
-  line-height: 1.15;
+  margin-top: 2px;
+  font-size: 10px;
+  line-height: 1.1;
   opacity: .9;
 }
 
-/* RIGHT COLUMN */
+/* PHOTOS BOTTOM RIGHT */
 
-.right-column {
-  height: 100%;
-  display: grid;
-  grid-template-rows: .78fr 1fr;
-  gap: 16px;
-}
-
-.video-panel,
 .photo-panel {
   padding: 18px;
   display: flex;
@@ -329,16 +289,6 @@ body {
   min-height: 0;
 }
 
-.video-header,
-.photo-header {
-  font-size: 27px;
-  font-weight: 800;
-  margin-bottom: 12px;
-  position: relative;
-  z-index: 1;
-}
-
-.video-box,
 .photo-box {
   flex: 1;
   border-radius: 22px;
@@ -349,7 +299,6 @@ body {
   z-index: 1;
 }
 
-.video-placeholder,
 .photo-placeholder {
   width: 100%;
   height: 100%;
@@ -359,16 +308,10 @@ body {
   align-items: center;
   justify-content: center;
   text-align: center;
-  font-size: 25px;
+  font-size: 27px;
   line-height: 1.35;
   padding: 28px;
   opacity: .9;
-}
-
-.youtube-frame {
-  width: 100%;
-  height: 100%;
-  border: none;
 }
 
 .slide-image {
@@ -407,6 +350,7 @@ body {
   overflow: hidden;
   display: flex;
   align-items: center;
+  justify-content: center;
   background: rgba(0,0,0,.74);
   border-top: 1px solid rgba(255,255,255,.18);
   font-size: 27px;
@@ -416,6 +360,9 @@ body {
 
 .ticker-content {
   display: inline-block;
+}
+
+.ticker-content.scrolling {
   padding-left: 100%;
   animation: scrollTicker 42s linear infinite;
 }
@@ -456,63 +403,36 @@ body {
 
     <main class="layout">
 
-      <section class="left-column">
-
-        <section class="panel weather-panel">
-          <div class="panel-title">Current Weather</div>
-
-          <div class="current-weather-center">
-            <div class="current-row">
-              <div class="weather-icon" id="currentIcon">🌤️</div>
-              <div class="current-temp" id="currentTemp">--°</div>
-            </div>
-
-            <div class="condition" id="currentCondition">Loading weather...</div>
-            <div class="details" id="currentDetails">Please wait.</div>
+      <section class="panel news-panel">
+        <div class="panel-title">Weekly News</div>
+        <div class="news-box" id="videoBox">
+          <div class="video-placeholder">
+            Weekly YouTube video<br><br>
+            Add video URL later from form
           </div>
-
-          <div class="mini-forecast">
-            <div class="forecast-block">
-              <div class="forecast-label">Today</div>
-              <div class="forecast-main">
-                <div class="forecast-icon" id="todayIcon">🌤️</div>
-                <div class="forecast-temp" id="todayTemp">--°</div>
-              </div>
-              <div class="forecast-condition" id="todayCondition">Loading...</div>
-            </div>
-
-            <div class="forecast-block">
-              <div class="forecast-label">Tomorrow</div>
-              <div class="forecast-main">
-                <div class="forecast-icon" id="tomorrowIcon">🌤️</div>
-                <div class="forecast-temp" id="tomorrowTemp">--°</div>
-              </div>
-              <div class="forecast-condition" id="tomorrowCondition">Loading...</div>
-            </div>
-          </div>
-        </section>
-
-        <section class="panel week-panel">
-          <div class="panel-title">5-Day Forecast</div>
-          <div class="week-grid" id="weekGrid"></div>
-        </section>
-
+        </div>
       </section>
 
       <section class="right-column">
 
-        <section class="panel video-panel">
-          <div class="video-header">Weekly News</div>
-          <div class="video-box" id="videoBox">
-            <div class="video-placeholder">
-              Weekly YouTube video<br><br>
-              Add video URL later from form
+        <section class="panel weather-panel">
+          <div class="panel-title">Weather</div>
+
+          <div class="weather-main">
+            <div class="weather-icon" id="currentIcon">🌤️</div>
+
+            <div>
+              <div class="current-temp" id="currentTemp">--°</div>
+              <div class="condition" id="currentCondition">Loading weather...</div>
+              <div class="details" id="currentDetails">Please wait.</div>
             </div>
           </div>
+
+          <div class="forecast-strip" id="weekGrid"></div>
         </section>
 
         <section class="panel photo-panel">
-          <div class="photo-header">Company Photos</div>
+          <div class="panel-title">Company Photos</div>
           <div class="photo-box" id="photoBox">
             <div class="photo-placeholder">
               Photo rotation placeholder<br><br>
@@ -545,7 +465,28 @@ const ENABLE_OFF_HOURS_DIM = true;
 const DIM_START_HOUR = 18;
 const DIM_END_HOUR = 6;
 
+/*
+Later:
+Paste YouTube embed URL here, or load it from a form/sheet.
+
+Normal YouTube:
+https://www.youtube.com/watch?v=VIDEO_ID
+
+Embed format:
+https://www.youtube.com/embed/VIDEO_ID?autoplay=1&mute=1&loop=1&playlist=VIDEO_ID
+*/
+
 const YOUTUBE_EMBED_URL = "";
+
+/*
+Photo rotation:
+Create a /photos folder in GitHub and add image files.
+
+Example:
+photos/photo1.jpg
+photos/photo2.jpg
+photos/photo3.jpg
+*/
 
 const PHOTO_SLIDES = [
   // "photos/photo1.jpg",
@@ -557,6 +498,7 @@ let photoIndex = 0;
 
 function updateClock() {
   const now = new Date();
+
   document.getElementById("time").textContent = now.toLocaleString("en-US", {
     timeZone: TIMEZONE,
     weekday: "long",
@@ -603,10 +545,26 @@ function cToF(c) {
 }
 
 function shortenForecast(text = "") {
-  if (text.length > 18) {
-    return text.substring(0, 18) + "...";
+  if (text.length > 15) {
+    return text.substring(0, 15) + "...";
   }
   return text;
+}
+
+function dateKey(date) {
+  return date.toLocaleDateString("en-CA", {
+    timeZone: TIMEZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  });
+}
+
+function weekdayLabel(dateString) {
+  return new Date(dateString).toLocaleDateString("en-US", {
+    timeZone: TIMEZONE,
+    weekday: "short"
+  });
 }
 
 async function getWeather() {
@@ -629,8 +587,6 @@ async function getWeather() {
     const obsData = await obsResponse.json();
 
     updateCurrent(obsData, periods[0]);
-    updateToday(periods);
-    updateTomorrow(periods);
     updateWeek(periods);
 
     document.getElementById("status").textContent =
@@ -658,47 +614,38 @@ function updateCurrent(obsData, fallbackPeriod) {
 
   document.getElementById("currentCondition").textContent = text || "Current Conditions";
 
-  const windMph = props.windSpeed.value
-    ? Math.round(props.windSpeed.value * 2.237) + " mph"
+  const windValue = props.windSpeed && props.windSpeed.value;
+  const humidityValue = props.relativeHumidity && props.relativeHumidity.value;
+
+  const windMph = windValue !== null && windValue !== undefined
+    ? Math.round(windValue * 2.237) + " mph"
     : "N/A";
 
-  const humidity = props.relativeHumidity.value
-    ? Math.round(props.relativeHumidity.value) + "%"
+  const humidity = humidityValue !== null && humidityValue !== undefined
+    ? Math.round(humidityValue) + "%"
     : "N/A";
 
   document.getElementById("currentDetails").textContent =
     `Wind: ${windMph} • Humidity: ${humidity}`;
 }
 
-function updateToday(periods) {
-  const today = periods.find(p => p.isDaytime) || periods[0];
-
-  document.getElementById("todayIcon").textContent = iconFor(today.shortForecast);
-  document.getElementById("todayTemp").textContent = `${today.temperature}°`;
-  document.getElementById("todayCondition").textContent = shortenForecast(today.shortForecast);
-}
-
-function updateTomorrow(periods) {
-  const firstDay = periods.findIndex(p => p.isDaytime);
-  const tomorrow = periods.slice(firstDay + 1).find(p => p.isDaytime) || periods[2];
-
-  document.getElementById("tomorrowIcon").textContent = iconFor(tomorrow.shortForecast);
-  document.getElementById("tomorrowTemp").textContent = `${tomorrow.temperature}°`;
-  document.getElementById("tomorrowCondition").textContent = shortenForecast(tomorrow.shortForecast);
-}
-
 function updateWeek(periods) {
   const grid = document.getElementById("weekGrid");
   grid.innerHTML = "";
 
-  const days = periods.filter(p => p.isDaytime).slice(0, 5);
+  const today = dateKey(new Date());
+
+  const days = periods
+    .filter(p => p.isDaytime)
+    .filter(p => dateKey(new Date(p.startTime)) !== today)
+    .slice(0, 5);
 
   days.forEach(day => {
     const card = document.createElement("div");
     card.className = "day-card";
 
     card.innerHTML = `
-      <div class="day-name">${day.name}</div>
+      <div class="day-name">${weekdayLabel(day.startTime)}</div>
       <div class="day-icon">${iconFor(day.shortForecast)}</div>
       <div class="day-temp">${day.temperature}°</div>
       <div class="day-condition">${shortenForecast(day.shortForecast)}</div>
