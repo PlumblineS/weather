@@ -8,6 +8,7 @@
 <style>
 :root {
   --navy: #061a33;
+  --deep-blue: #082b55;
   --cyan: #35c7ff;
   --orange: #ff9f1c;
   --glass: rgba(255,255,255,.12);
@@ -26,14 +27,51 @@ body {
   font-family: "Segoe UI", Arial, sans-serif;
   color: white;
   background:
-    radial-gradient(circle at top left, rgba(53,199,255,.30), transparent 35%),
-    radial-gradient(circle at bottom right, rgba(255,159,28,.14), transparent 35%),
-    linear-gradient(135deg, #061a33, #0b3d72 55%, #041326);
+    radial-gradient(circle at top left, rgba(53,199,255,.28), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(255,159,28,.16), transparent 36%),
+    linear-gradient(135deg, #061a33, #0b3d72 58%, #041326);
+  background-size: 140% 140%;
+  animation: backgroundMove 420s ease-in-out infinite alternate;
+}
+
+@keyframes backgroundMove {
+  0% { background-position: 0% 0%; }
+  50% { background-position: 80% 40%; }
+  100% { background-position: 20% 100%; }
+}
+
+/* burn-in protection: slowly shifts the full dashboard */
+.burn-in-shift {
+  height: 100vh;
+  animation: pixelShift 360s infinite alternate ease-in-out;
+}
+
+@keyframes pixelShift {
+  0% { transform: translate(0, 0); }
+  20% { transform: translate(8px, -6px); }
+  40% { transform: translate(-7px, 5px); }
+  60% { transform: translate(6px, 8px); }
+  80% { transform: translate(-9px, -5px); }
+  100% { transform: translate(5px, -8px); }
+}
+
+/* optional dim overlay for off-hours */
+.dim-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0);
+  pointer-events: none;
+  z-index: 999;
+  transition: background 2s ease;
+}
+
+.dim-overlay.active {
+  background: rgba(0,0,0,.42);
 }
 
 .header {
-  height: 92px;
-  padding: 16px 34px;
+  height: 88px;
+  padding: 14px 32px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -44,29 +82,29 @@ body {
 .logo-wrap {
   display: flex;
   align-items: center;
-  gap: 26px;
+  gap: 24px;
 }
 
 .logo {
-  height: 54px;
+  height: 52px;
   filter: drop-shadow(0 5px 12px rgba(0,0,0,.4));
 }
 
 .location {
-  font-size: 30px;
+  font-size: 28px;
   font-weight: 700;
 }
 
 .time {
-  font-size: 25px;
+  font-size: 24px;
   opacity: .95;
 }
 
 .layout {
-  height: calc(100vh - 152px);
-  padding: 24px 34px 78px;
+  height: calc(100vh - 148px);
+  padding: 22px 32px 76px;
   display: grid;
-  grid-template-columns: 1fr 470px;
+  grid-template-columns: .9fr 1.35fr;
   gap: 24px;
 }
 
@@ -76,143 +114,179 @@ body {
   border-radius: 26px;
   box-shadow: 0 24px 70px rgba(0,0,0,.28);
   backdrop-filter: blur(14px);
+  overflow: hidden;
+  position: relative;
 }
 
-/* WEATHER */
+.panel::before {
+  content: "";
+  position: absolute;
+  inset: -60%;
+  background: radial-gradient(circle, rgba(255,255,255,.08), transparent 35%);
+  animation: panelGlow 300s linear infinite;
+  pointer-events: none;
+}
 
-.weather-dashboard {
+@keyframes panelGlow {
+  from { transform: translate(-10%, -10%) rotate(0deg); }
+  to { transform: translate(10%, 10%) rotate(360deg); }
+}
+
+/* LEFT COLUMN */
+
+.left-column {
   height: 100%;
   display: grid;
-  grid-template-rows: 1fr 205px;
+  grid-template-rows: 1fr 1.05fr;
   gap: 20px;
 }
 
-.top-weather {
+/* WEATHER PANEL */
+
+.weather-panel {
+  padding: 26px;
   display: grid;
-  grid-template-columns: 1.25fr .85fr;
-  gap: 20px;
-}
-
-.current-panel {
-  padding: 34px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+  grid-template-rows: auto 1fr auto;
+  min-height: 0;
 }
 
 .panel-title {
-  font-size: 28px;
-  font-weight: 600;
-  opacity: .85;
+  font-size: 24px;
+  font-weight: 700;
+  opacity: .88;
   margin-bottom: 10px;
+  position: relative;
+  z-index: 1;
 }
 
 .current-row {
   display: flex;
   align-items: center;
-  gap: 28px;
+  justify-content: center;
+  gap: 22px;
+  position: relative;
+  z-index: 1;
 }
 
 .weather-icon {
-  font-size: 102px;
+  font-size: 76px;
 }
 
 .current-temp {
-  font-size: 132px;
-  line-height: .9;
+  font-size: 92px;
+  line-height: .95;
   font-weight: 850;
-  letter-spacing: -5px;
+  letter-spacing: -4px;
 }
 
 .condition {
-  font-size: 40px;
-  margin-top: 16px;
+  text-align: center;
+  font-size: 30px;
+  margin-top: 8px;
   font-weight: 650;
+  position: relative;
+  z-index: 1;
 }
 
 .details {
-  margin-top: 16px;
-  font-size: 23px;
-  line-height: 1.45;
+  text-align: center;
+  margin-top: 8px;
+  font-size: 19px;
   opacity: .9;
+  position: relative;
+  z-index: 1;
 }
 
-.side-panel {
-  padding: 24px;
+.mini-forecast {
+  margin-top: 18px;
   display: grid;
-  grid-template-rows: 1fr 1fr;
-  gap: 18px;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  position: relative;
+  z-index: 1;
 }
 
 .forecast-block {
   background: rgba(0,0,0,.18);
-  border-radius: 20px;
-  padding: 20px;
+  border-radius: 18px;
+  padding: 14px;
   border: 1px solid rgba(255,255,255,.12);
 }
 
 .forecast-label {
-  font-size: 23px;
+  font-size: 17px;
   opacity: .8;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .forecast-main {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 10px;
 }
 
 .forecast-icon {
-  font-size: 44px;
+  font-size: 28px;
 }
 
 .forecast-temp {
-  font-size: 48px;
+  font-size: 32px;
   font-weight: 800;
   color: var(--cyan);
 }
 
 .forecast-condition {
-  font-size: 22px;
-  margin-top: 8px;
+  font-size: 15px;
+  margin-top: 6px;
+  opacity: .92;
 }
 
+/* 5-DAY FORECAST */
+
 .week-panel {
-  padding: 14px;
+  padding: 18px;
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 14px;
+  grid-template-rows: auto 1fr;
+  min-height: 0;
+}
+
+.week-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  min-height: 0;
+  position: relative;
+  z-index: 1;
 }
 
 .day-card {
   background: rgba(0,0,0,.19);
   border-radius: 18px;
-  padding: 12px 8px;
+  padding: 12px 7px;
   text-align: center;
   border: 1px solid rgba(255,255,255,.12);
   overflow: hidden;
 }
 
 .day-name {
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 700;
 }
 
 .day-icon {
-  font-size: 34px;
+  font-size: 30px;
   margin: 8px 0 4px;
 }
 
 .day-temp {
-  font-size: 30px;
+  font-size: 26px;
   font-weight: 800;
   color: var(--cyan);
 }
 
 .day-condition {
   margin-top: 4px;
-  font-size: 15px;
+  font-size: 13px;
   opacity: .9;
 }
 
@@ -221,12 +295,13 @@ body {
 .right-column {
   height: 100%;
   display: grid;
-  grid-template-rows: 1fr 1fr;
+  grid-template-rows: .85fr 1.25fr;
   gap: 20px;
 }
 
-.video-panel,
-.photo-panel {
+/* VIDEO */
+
+.video-panel {
   padding: 18px;
   display: flex;
   flex-direction: column;
@@ -235,22 +310,63 @@ body {
 
 .video-header,
 .photo-header {
-  font-size: 27px;
+  font-size: 28px;
   font-weight: 800;
   margin-bottom: 14px;
+  position: relative;
+  z-index: 1;
 }
 
-.video-box,
+.video-box {
+  flex: 1;
+  border-radius: 22px;
+  overflow: hidden;
+  background: rgba(0,0,0,.38);
+  border: 1px solid rgba(255,255,255,.16);
+  position: relative;
+  z-index: 1;
+}
+
+.video-placeholder {
+  width: 100%;
+  height: 100%;
+  border: 2px dashed rgba(255,255,255,.28);
+  border-radius: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 28px;
+  line-height: 1.35;
+  padding: 30px;
+  opacity: .9;
+}
+
+.youtube-frame {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* PHOTOS */
+
+.photo-panel {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
 .photo-box {
   flex: 1;
   border-radius: 22px;
   overflow: hidden;
-  background: rgba(0,0,0,.35);
+  background: rgba(0,0,0,.38);
   border: 1px solid rgba(255,255,255,.16);
   position: relative;
+  z-index: 1;
 }
 
-.video-placeholder,
 .photo-placeholder {
   width: 100%;
   height: 100%;
@@ -260,16 +376,10 @@ body {
   align-items: center;
   justify-content: center;
   text-align: center;
-  font-size: 23px;
+  font-size: 28px;
   line-height: 1.35;
-  padding: 24px;
+  padding: 30px;
   opacity: .9;
-}
-
-.youtube-frame {
-  width: 100%;
-  height: 100%;
-  border: none;
 }
 
 .slide-image {
@@ -291,9 +401,10 @@ body {
   left: 0;
   bottom: 0;
   width: 100%;
-  padding: 12px 16px;
-  background: linear-gradient(transparent, rgba(0,0,0,.78));
-  font-size: 18px;
+  padding: 18px 22px;
+  background: linear-gradient(transparent, rgba(0,0,0,.82));
+  font-size: 24px;
+  font-weight: 700;
 }
 
 /* TICKER */
@@ -307,7 +418,7 @@ body {
   overflow: hidden;
   display: flex;
   align-items: center;
-  background: rgba(0,0,0,.68);
+  background: rgba(0,0,0,.70);
   border-top: 1px solid rgba(255,255,255,.18);
   font-size: 27px;
   white-space: nowrap;
@@ -334,14 +445,16 @@ body {
   position: fixed;
   right: 22px;
   bottom: 72px;
-  font-size: 14px;
-  opacity: .65;
+  font-size: 13px;
+  opacity: .45;
   z-index: 21;
 }
 </style>
 </head>
 
 <body>
+
+<div class="burn-in-shift">
 
 <header class="header">
   <div class="logo-wrap">
@@ -353,12 +466,12 @@ body {
 
 <main class="layout">
 
-  <section class="weather-dashboard">
+  <section class="left-column">
 
-    <div class="top-weather">
-      <section class="panel current-panel">
-        <div class="panel-title">Current Conditions</div>
+    <section class="panel weather-panel">
+      <div class="panel-title">Current Weather</div>
 
+      <div>
         <div class="current-row">
           <div class="weather-icon" id="currentIcon">🌤️</div>
           <div class="current-temp" id="currentTemp">--°</div>
@@ -366,9 +479,9 @@ body {
 
         <div class="condition" id="currentCondition">Loading weather...</div>
         <div class="details" id="currentDetails">Please wait.</div>
-      </section>
+      </div>
 
-      <section class="panel side-panel">
+      <div class="mini-forecast">
         <div class="forecast-block">
           <div class="forecast-label">Today</div>
           <div class="forecast-main">
@@ -386,14 +499,17 @@ body {
           </div>
           <div class="forecast-condition" id="tomorrowCondition">Loading...</div>
         </div>
-      </section>
-    </div>
+      </div>
+    </section>
 
-    <section class="panel week-panel" id="weekGrid"></section>
+    <section class="panel week-panel">
+      <div class="panel-title">5-Day Forecast</div>
+      <div class="week-grid" id="weekGrid"></div>
+    </section>
 
   </section>
 
-  <aside class="right-column">
+  <section class="right-column">
 
     <section class="panel video-panel">
       <div class="video-header">Weekly News</div>
@@ -416,7 +532,7 @@ body {
       </div>
     </section>
 
-  </aside>
+  </section>
 
 </main>
 
@@ -432,34 +548,47 @@ body {
 
 <div class="status" id="status">Weather not updated yet</div>
 
+</div>
+
+<div class="dim-overlay" id="dimOverlay"></div>
+
 <script>
 const LAT = 39.5807;
 const LON = -104.8772;
 const TIMEZONE = "America/Denver";
 
 /*
-Future form field:
-Weekly YouTube URL
+Burn-in/off-hours dimming:
+Set to true if you want the TV to dim after hours.
+Current default: dims between 6 PM and 6 AM.
+*/
+const ENABLE_OFF_HOURS_DIM = true;
+const DIM_START_HOUR = 18;
+const DIM_END_HOUR = 6;
 
-For now, paste an embed URL here when ready.
+/*
+Later:
+Paste YouTube embed URL here, or load it from a form/sheet.
 
-Example:
-const YOUTUBE_EMBED_URL = "https://www.youtube.com/embed/VIDEO_ID?autoplay=1&mute=1&loop=1&playlist=VIDEO_ID";
+Normal YouTube:
+https://www.youtube.com/watch?v=VIDEO_ID
+
+Embed format:
+https://www.youtube.com/embed/VIDEO_ID?autoplay=1&mute=1&loop=1&playlist=VIDEO_ID
 */
 
 const YOUTUBE_EMBED_URL = "";
 
 /*
 Photo rotation:
-Put image files in a folder called /photos next to this HTML file.
+Create a /photos folder in GitHub and add image files.
 
 Example:
 photos/photo1.jpg
 photos/photo2.jpg
 photos/photo3.jpg
 
-Add as many as you want here.
-30 is totally fine.
+Then uncomment/add them below.
 */
 
 const PHOTO_SLIDES = [
@@ -481,6 +610,24 @@ function updateClock() {
     minute: "2-digit",
     hour12: true
   });
+
+  updateDimming(now);
+}
+
+function updateDimming(now) {
+  if (!ENABLE_OFF_HOURS_DIM) return;
+
+  const denverHour = Number(now.toLocaleString("en-US", {
+    timeZone: TIMEZONE,
+    hour: "numeric",
+    hour12: false
+  }));
+
+  const shouldDim =
+    denverHour >= DIM_START_HOUR ||
+    denverHour < DIM_END_HOUR;
+
+  document.getElementById("dimOverlay").classList.toggle("active", shouldDim);
 }
 
 function iconFor(text = "") {
@@ -503,8 +650,8 @@ function cToF(c) {
 }
 
 function shortenForecast(text = "") {
-  if (text.length > 26) {
-    return text.substring(0, 26) + "...";
+  if (text.length > 24) {
+    return text.substring(0, 24) + "...";
   }
   return text;
 }
@@ -591,7 +738,7 @@ function updateWeek(periods) {
   const grid = document.getElementById("weekGrid");
   grid.innerHTML = "";
 
-  const days = periods.filter(p => p.isDaytime).slice(0, 7);
+  const days = periods.filter(p => p.isDaytime).slice(0, 5);
 
   days.forEach(day => {
     const card = document.createElement("div");
@@ -645,6 +792,8 @@ function setupPhotoRotation() {
 
   setInterval(() => {
     const images = document.querySelectorAll(".slide-image");
+
+    if (!images.length) return;
 
     images[photoIndex].classList.remove("active");
     photoIndex = (photoIndex + 1) % images.length;
