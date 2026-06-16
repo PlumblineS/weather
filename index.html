@@ -8,7 +8,6 @@
 <style>
 :root {
   --navy: #061a33;
-  --blue: #0077c8;
   --cyan: #35c7ff;
   --orange: #ff9f1c;
   --glass: rgba(255,255,255,.12);
@@ -67,22 +66,8 @@ body {
   height: calc(100vh - 152px);
   padding: 24px 34px 78px;
   display: grid;
-  grid-template-columns: 1fr 430px;
+  grid-template-columns: 1fr 470px;
   gap: 24px;
-}
-
-.left-stage {
-  position: relative;
-  min-width: 0;
-}
-
-.screen {
-  display: none;
-  height: 100%;
-}
-
-.screen.active {
-  display: block;
 }
 
 .panel {
@@ -93,7 +78,9 @@ body {
   backdrop-filter: blur(14px);
 }
 
-.dashboard-grid {
+/* WEATHER */
+
+.weather-dashboard {
   height: 100%;
   display: grid;
   grid-template-rows: 1fr 205px;
@@ -229,68 +216,42 @@ body {
   opacity: .9;
 }
 
-/* Announcements */
+/* RIGHT COLUMN */
 
-.announcement-screen {
+.right-column {
   height: 100%;
-  padding: 34px;
-}
-
-.announcement-screen h1 {
-  font-size: 52px;
-  margin-bottom: 28px;
-}
-
-.announcement-grid {
   display: grid;
-  gap: 22px;
+  grid-template-rows: 1fr 1fr;
+  gap: 20px;
 }
 
-.announcement-item {
-  background: rgba(0,0,0,.22);
-  border: 1px solid rgba(255,255,255,.14);
-  border-radius: 24px;
-  padding: 26px;
-}
-
-.announcement-item h2 {
-  font-size: 34px;
-  color: var(--orange);
-  margin-bottom: 8px;
-}
-
-.announcement-item p {
-  font-size: 27px;
-  line-height: 1.35;
-}
-
-/* Permanent Video Panel */
-
-.video-panel {
+.video-panel,
+.photo-panel {
   padding: 18px;
   display: flex;
   flex-direction: column;
-  min-width: 0;
+  min-height: 0;
 }
 
-.video-header {
-  font-size: 29px;
+.video-header,
+.photo-header {
+  font-size: 27px;
   font-weight: 800;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
-.video-box {
+.video-box,
+.photo-box {
   flex: 1;
   border-radius: 22px;
   overflow: hidden;
   background: rgba(0,0,0,.35);
   border: 1px solid rgba(255,255,255,.16);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  position: relative;
 }
 
-.video-placeholder {
+.video-placeholder,
+.photo-placeholder {
   width: 100%;
   height: 100%;
   border: 2px dashed rgba(255,255,255,.28);
@@ -299,34 +260,43 @@ body {
   align-items: center;
   justify-content: center;
   text-align: center;
-  font-size: 25px;
+  font-size: 23px;
   line-height: 1.35;
   padding: 24px;
   opacity: .9;
 }
 
-/*
-When you have a video file, replace the placeholder div with:
+.youtube-frame {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
 
-<video class="news-video" autoplay muted loop playsinline>
-  <source src="news-video.mp4" type="video/mp4">
-</video>
-*/
-
-.news-video {
+.slide-image {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  opacity: 0;
+  transition: opacity 1.2s ease-in-out;
 }
 
-.video-footer {
-  margin-top: 14px;
+.slide-image.active {
+  opacity: 1;
+}
+
+.photo-caption {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  padding: 12px 16px;
+  background: linear-gradient(transparent, rgba(0,0,0,.78));
   font-size: 18px;
-  opacity: .75;
-  line-height: 1.35;
 }
 
-/* Ticker */
+/* TICKER */
 
 .ticker {
   position: fixed;
@@ -383,91 +353,69 @@ When you have a video file, replace the placeholder div with:
 
 <main class="layout">
 
-  <section class="left-stage">
+  <section class="weather-dashboard">
 
-    <!-- SCREEN 1: WEATHER DASHBOARD -->
-    <section class="screen active" id="screen-dashboard">
-      <div class="dashboard-grid">
+    <div class="top-weather">
+      <section class="panel current-panel">
+        <div class="panel-title">Current Conditions</div>
 
-        <div class="top-weather">
-          <section class="panel current-panel">
-            <div class="panel-title">Current Conditions</div>
-
-            <div class="current-row">
-              <div class="weather-icon" id="currentIcon">🌤️</div>
-              <div class="current-temp" id="currentTemp">--°</div>
-            </div>
-
-            <div class="condition" id="currentCondition">Loading weather...</div>
-            <div class="details" id="currentDetails">Please wait.</div>
-          </section>
-
-          <section class="panel side-panel">
-            <div class="forecast-block">
-              <div class="forecast-label">Today</div>
-              <div class="forecast-main">
-                <div class="forecast-icon" id="todayIcon">🌤️</div>
-                <div class="forecast-temp" id="todayTemp">--°</div>
-              </div>
-              <div class="forecast-condition" id="todayCondition">Loading...</div>
-            </div>
-
-            <div class="forecast-block">
-              <div class="forecast-label">Tomorrow</div>
-              <div class="forecast-main">
-                <div class="forecast-icon" id="tomorrowIcon">🌤️</div>
-                <div class="forecast-temp" id="tomorrowTemp">--°</div>
-              </div>
-              <div class="forecast-condition" id="tomorrowCondition">Loading...</div>
-            </div>
-          </section>
+        <div class="current-row">
+          <div class="weather-icon" id="currentIcon">🌤️</div>
+          <div class="current-temp" id="currentTemp">--°</div>
         </div>
 
-        <section class="panel week-panel" id="weekGrid"></section>
+        <div class="condition" id="currentCondition">Loading weather...</div>
+        <div class="details" id="currentDetails">Please wait.</div>
+      </section>
 
-      </div>
-    </section>
-
-    <!-- SCREEN 2: ANNOUNCEMENTS -->
-    <section class="screen" id="screen-announcements">
-      <section class="panel announcement-screen">
-        <h1>Office Announcements</h1>
-
-        <div class="announcement-grid">
-          <div class="announcement-item">
-            <h2>🚚 Fleet Reminder</h2>
-            <p>Gas receipts are due by Friday.</p>
+      <section class="panel side-panel">
+        <div class="forecast-block">
+          <div class="forecast-label">Today</div>
+          <div class="forecast-main">
+            <div class="forecast-icon" id="todayIcon">🌤️</div>
+            <div class="forecast-temp" id="todayTemp">--°</div>
           </div>
+          <div class="forecast-condition" id="todayCondition">Loading...</div>
+        </div>
 
-          <div class="announcement-item">
-            <h2>🎉 Summer Party</h2>
-            <p>Summer party coming up on 7/11. More details coming soon.</p>
+        <div class="forecast-block">
+          <div class="forecast-label">Tomorrow</div>
+          <div class="forecast-main">
+            <div class="forecast-icon" id="tomorrowIcon">🌤️</div>
+            <div class="forecast-temp" id="tomorrowTemp">--°</div>
           </div>
-
-          <div class="announcement-item">
-            <h2>📢 Coming Soon</h2>
-            <p>Announcements will eventually feed from Microsoft Lists or a manager submission form.</p>
-          </div>
+          <div class="forecast-condition" id="tomorrowCondition">Loading...</div>
         </div>
       </section>
-    </section>
+    </div>
+
+    <section class="panel week-panel" id="weekGrid"></section>
 
   </section>
 
-  <!-- PERMANENT NEWS VIDEO AREA -->
-  <aside class="panel video-panel">
-    <div class="video-header">Weekly News</div>
+  <aside class="right-column">
 
-    <div class="video-box">
-      <div class="video-placeholder">
-        News video will play here<br><br>
-        Looping video placeholder
+    <section class="panel video-panel">
+      <div class="video-header">Weekly News</div>
+      <div class="video-box" id="videoBox">
+        <div class="video-placeholder">
+          Weekly YouTube video<br><br>
+          Add video URL later from form
+        </div>
       </div>
-    </div>
+    </section>
 
-    <div class="video-footer">
-      This panel stays visible while weather and announcements rotate.
-    </div>
+    <section class="panel photo-panel">
+      <div class="photo-header">Company Photos</div>
+      <div class="photo-box" id="photoBox">
+        <div class="photo-placeholder" id="photoPlaceholder">
+          Photo rotation placeholder<br><br>
+          Supports 30+ images<br>
+          fading every 3 seconds
+        </div>
+      </div>
+    </section>
+
   </aside>
 
 </main>
@@ -478,7 +426,7 @@ When you have a video file, replace the placeholder div with:
     &nbsp;&nbsp; • &nbsp;&nbsp;
     <span class="badge">🎉 Event:</span> Summer Party coming up 7/11
     &nbsp;&nbsp; • &nbsp;&nbsp;
-    <span class="badge">📢 News:</span> Announcements will eventually come from Microsoft Lists
+    <span class="badge">📢 News:</span> Announcements will eventually come from your form
   </div>
 </div>
 
@@ -489,12 +437,38 @@ const LAT = 39.5807;
 const LON = -104.8772;
 const TIMEZONE = "America/Denver";
 
-const screens = [
-  "screen-dashboard",
-  "screen-announcements"
+/*
+Future form field:
+Weekly YouTube URL
+
+For now, paste an embed URL here when ready.
+
+Example:
+const YOUTUBE_EMBED_URL = "https://www.youtube.com/embed/VIDEO_ID?autoplay=1&mute=1&loop=1&playlist=VIDEO_ID";
+*/
+
+const YOUTUBE_EMBED_URL = "";
+
+/*
+Photo rotation:
+Put image files in a folder called /photos next to this HTML file.
+
+Example:
+photos/photo1.jpg
+photos/photo2.jpg
+photos/photo3.jpg
+
+Add as many as you want here.
+30 is totally fine.
+*/
+
+const PHOTO_SLIDES = [
+  // "photos/photo1.jpg",
+  // "photos/photo2.jpg",
+  // "photos/photo3.jpg"
 ];
 
-let currentScreenIndex = 0;
+let photoIndex = 0;
 
 function updateClock() {
   const now = new Date();
@@ -507,12 +481,6 @@ function updateClock() {
     minute: "2-digit",
     hour12: true
   });
-}
-
-function rotateScreen() {
-  document.getElementById(screens[currentScreenIndex]).classList.remove("active");
-  currentScreenIndex = (currentScreenIndex + 1) % screens.length;
-  document.getElementById(screens[currentScreenIndex]).classList.add("active");
 }
 
 function iconFor(text = "") {
@@ -640,11 +608,56 @@ function updateWeek(periods) {
   });
 }
 
+function setupVideo() {
+  const videoBox = document.getElementById("videoBox");
+
+  if (!YOUTUBE_EMBED_URL) return;
+
+  videoBox.innerHTML = `
+    <iframe
+      class="youtube-frame"
+      src="${YOUTUBE_EMBED_URL}"
+      allow="autoplay; encrypted-media"
+      allowfullscreen>
+    </iframe>
+  `;
+}
+
+function setupPhotoRotation() {
+  const photoBox = document.getElementById("photoBox");
+
+  if (!PHOTO_SLIDES.length) return;
+
+  photoBox.innerHTML = "";
+
+  PHOTO_SLIDES.forEach((src, index) => {
+    const img = document.createElement("img");
+    img.src = src;
+    img.className = "slide-image";
+    if (index === 0) img.classList.add("active");
+    photoBox.appendChild(img);
+  });
+
+  const caption = document.createElement("div");
+  caption.className = "photo-caption";
+  caption.textContent = "Company Photos";
+  photoBox.appendChild(caption);
+
+  setInterval(() => {
+    const images = document.querySelectorAll(".slide-image");
+
+    images[photoIndex].classList.remove("active");
+    photoIndex = (photoIndex + 1) % images.length;
+    images[photoIndex].classList.add("active");
+  }, 3000);
+}
+
 updateClock();
 getWeather();
+setupVideo();
+setupPhotoRotation();
 
 setInterval(updateClock, 1000);
-setInterval(rotateScreen, 25000);
 setInterval(getWeather, 10 * 60 * 1000);
 </script>
 
